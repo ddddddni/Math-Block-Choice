@@ -48,7 +48,6 @@ button.primary{
   overflow:hidden;
 }
 
-/* math symbols background */
 .math-bg{
   position:absolute;
   inset:0;
@@ -76,7 +75,6 @@ button.primary{
   50%{transform:translateY(-14px)}
 }
 
-/* menu content */
 .menu-content{
   position:relative;
   z-index:2;
@@ -129,7 +127,7 @@ button.primary{
   margin:30px 0;
 }
 
-/* ✅ เปลี่ยนเป็น grid 2x2 */
+/* ✅ Grid 2x2 */
 .choices{
   display:grid;
   grid-template-columns:repeat(2,140px);
@@ -152,17 +150,10 @@ button.primary{
 
 <body>
 
-<!-- ===== MENU ===== -->
-<div id="menu" class="screen active menu-screen">
+<div id="menu" class="screen active">
   <div class="math-bg">
-    <span>＋</span>
-    <span>−</span>
-    <span>×</span>
-    <span>÷</span>
-    <span>＋</span>
-    <span>×</span>
+    <span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span>
   </div>
-
   <div class="menu-content">
     <h1 class="logo">Math<br>Block<br>Choice</h1>
     <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
@@ -170,7 +161,6 @@ button.primary{
   </div>
 </div>
 
-<!-- ===== COUNTDOWN ===== -->
 <div id="countdown" class="screen">
   <div class="big" id="countNum">3</div>
   <p>เตรียมพร้อม</p>
@@ -178,12 +168,10 @@ button.primary{
   <button class="primary" onclick="skipCountdown()">ข้าม</button>
 </div>
 
-<!-- ===== GAME ===== -->
 <div id="game" class="screen">
   <div class="hud">
     <div class="hud-left">
-      ❤️ <span id="heart">3</span> |
-      🏆 <span id="score">0</span>
+      ❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span>
     </div>
     <div class="hud-center">
       ⏱ <span id="time">10</span>
@@ -196,7 +184,6 @@ button.primary{
   <div class="game">
     <div class="question" id="question"></div>
     <div class="choices">
-      <!-- ✅ เปลี่ยนเป็น 4 ปุ่ม -->
       <button id="btn0" class="choice" onclick="choose(0)"></button>
       <button id="btn1" class="choice" onclick="choose(1)"></button>
       <button id="btn2" class="choice" onclick="choose(2)"></button>
@@ -205,7 +192,6 @@ button.primary{
   </div>
 </div>
 
-<!-- ===== PAUSE ===== -->
 <div id="pause" class="screen">
   <h2>หยุดเกม</h2>
   <br>
@@ -214,12 +200,13 @@ button.primary{
   <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
-<!-- ===== GAME OVER ===== -->
 <div id="over" class="screen">
   <div class="big">GAME OVER</div>
   <p>คะแนน: <span id="final"></span></p>
   <br>
-  <button class="primary" onclick="backMenu()">กลับหน้าแรก</button>
+  <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button>
+  <br><br>
+  <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
 <script>
@@ -228,9 +215,40 @@ let timer=null, paused=false, correctIndex=0, countdownTimer=null;
 
 const $ = id => document.getElementById(id);
 
-/* ... โค้ดเดิมทั้งหมดเหมือนเดิม ... */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
 
-/* ✅ เปลี่ยนเฉพาะ nextQuestion */
+function startGame(){
+  score=0; heart=3; 
+  $("score").textContent=score;
+  $("heart").textContent=heart;
+  startCountdown();
+}
+
+function startCountdown(){
+  showScreen('countdown');
+  let c=3;
+  $("countNum").textContent=c;
+  clearInterval(countdownTimer);
+  countdownTimer=setInterval(()=>{
+    c--;
+    if(c>0) $("countNum").textContent=c;
+    else { clearInterval(countdownTimer); showGame(); }
+  },1000);
+}
+
+function skipCountdown(){
+  clearInterval(countdownTimer);
+  showGame();
+}
+
+function showGame(){
+  showScreen('game');
+  nextQuestion();
+}
+
 function nextQuestion(){
   clearInterval(timer);
   time=10;
@@ -238,13 +256,12 @@ function nextQuestion(){
 
   const ops=["+","-","×","÷"];
   const op=ops[Math.floor(Math.random()*ops.length)];
+  let a, b, ans;
 
-  let a,b,ans;
-
-  if(op==="+"){a=Math.floor(Math.random()*20)+1;b=Math.floor(Math.random()*20)+1;ans=a+b;}
-  if(op==="−"||op==="-"){a=Math.floor(Math.random()*20)+1;b=Math.floor(Math.random()*a)+1;ans=a-b;}
-  if(op==="×"){a=Math.floor(Math.random()*9)+1;b=Math.floor(Math.random()*9)+1;ans=a*b;}
-  if(op==="÷"){b=Math.floor(Math.random()*9)+1;ans=Math.floor(Math.random()*9)+1;a=b*ans;}
+  if(op==="+"){ a=Math.floor(Math.random()*20)+1; b=Math.floor(Math.random()*20)+1; ans=a+b; }
+  else if(op==="-"){ a=Math.floor(Math.random()*20)+10; b=Math.floor(Math.random()*9)+1; ans=a-b; }
+  else if(op==="×"){ a=Math.floor(Math.random()*9)+1; b=Math.floor(Math.random()*9)+1; ans=a*b; }
+  else { b=Math.floor(Math.random()*9)+1; ans=Math.floor(Math.random()*9)+1; a=b*ans; }
 
   $("question").textContent=`${a} ${op} ${b}`;
 
@@ -256,9 +273,7 @@ function nextQuestion(){
   answers.sort(()=>Math.random()-0.5);
   correctIndex=answers.indexOf(ans);
 
-  for(let i=0;i<4;i++){
-    $("btn"+i).textContent=answers[i];
-  }
+  for(let i=0; i<4; i++) $("btn"+i).textContent=answers[i];
 
   timer=setInterval(()=>{
     if(!paused){
@@ -268,6 +283,33 @@ function nextQuestion(){
     }
   },1000);
 }
+
+function choose(idx){
+  if(idx===correctIndex){
+    score+=10;
+    $("score").textContent=score;
+    nextQuestion();
+  } else {
+    fail();
+  }
+}
+
+function fail(){
+  heart--;
+  $("heart").textContent=heart;
+  if(heart<=0) gameOver();
+  else nextQuestion();
+}
+
+function gameOver(){
+  clearInterval(timer);
+  $("final").textContent=score;
+  showScreen('over');
+}
+
+function pauseGame(){ paused=true; showScreen('pause'); }
+function resumeGame(){ paused=false; showScreen('game'); }
+function backMenu(){ clearInterval(timer); showScreen('menu'); }
 </script>
 </body>
 </html>
