@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Math Block Choice - Perfect Sound</title>
+<title>Math Block Choice - Tap to Start</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -15,12 +15,57 @@ body{
   transition:background .3s;
 }
 
+/* --- ส่วนที่เพิ่มใหม่: หน้าจอ Tap to Start --- */
+#intro-overlay {
+  position: fixed;
+  inset: 0; /* คลุมทั่วทั้งหน้าจอ (บน ขวา ล่าง ซ้าย = 0) */
+  background-color: rgba(255, 255, 255, 0.85); /* สีขาวโปร่งแสง ทำให้ฉากหลังดูจางๆ */
+  z-index: 9999; /* อยู่ชั้นบนสุด */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  
+  /* การตั้งค่าอนิเมชันตอนหายไป */
+  opacity: 1;
+  transition: opacity 0.6s ease-out, visibility 0.6s;
+}
+
+/* ข้อความตรงกลาง */
+#intro-overlay p {
+  font-size: 28px;
+  font-weight: bold;
+  color: #374151;
+  padding: 20px 30px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  animation: pulseText 2s infinite; /* เพิ่มลูกเล่นให้ข้อความขยับนิดๆ */
+}
+
+@keyframes pulseText {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* คลาสสำหรับสั่งให้ซ่อน (Fade Out) */
+#intro-overlay.hidden {
+  opacity: 0; /* จางหายไป */
+  visibility: hidden; /* ซ่อนไม่ให้เกะกะการกดปุ่มอื่นหลังจากจางหายไปแล้ว */
+  pointer-events: none; /* ป้องกันไม่ให้กดโดนระหว่างกำลังจาง */
+}
+
 /* ---------- COMMON ---------- */
 .screen{
   display:none;
   height:100vh;
   width:100%;
 }
+/* หน้าเมนูหลักต้องแสดงอยู่ตลอดเพื่อให้เป็นพื้นหลังแบบจางๆ */
+.menu-screen.active {
+    display: flex;
+}
+
 .active{
   display:flex;
   flex-direction:column;
@@ -122,7 +167,11 @@ button.primary:active {
 </style>
 </head>
 
-<body onclick="initAudioContext()">
+<body>
+
+<div id="intro-overlay" onclick="handleTapStart()">
+  <p>แตะหน้าจอเพื่อเริ่มเกม</p>
+</div>
 
 <audio id="bgMenu" loop src="sound/bg_menu.mp3"></audio>
 <audio id="bgGame" loop src="sound/bg_game.mp3"></audio>
@@ -202,9 +251,20 @@ const $ = id => document.getElementById(id);
 
 $("menuHighScore").textContent = highScore;
 
-// --- ระบบเสียง (Audio System) ---
+// --- ฟังก์ชันใหม่สำหรับจัดการการแตะครั้งแรก ---
+function handleTapStart() {
+  // 1. เริ่มต้นระบบเสียง (เหมือนเดิม)
+  initAudioContext();
+  
+  // 2. สั่งให้หน้ากาก Intro ค่อยๆ จางหายไป
+  const overlay = $("intro-overlay");
+  overlay.classList.add("hidden");
+  
+  // เล่นเสียงคลิกตอบรับการแตะ
+  playSFX('sndClick');
+}
 
-// ฟังก์ชันเล่นเสียงเอฟเฟกต์ (กดปุ่ม, ถูก, ผิด)
+// --- ระบบเสียง (Audio System) ---
 function playSFX(id) {
   const audio = $(id);
   if (audio) {
@@ -213,7 +273,6 @@ function playSFX(id) {
   }
 }
 
-// ฟังก์ชันเริ่มเล่นเพลง Background (Loop)
 function playBGM(id) {
   const audio = $(id);
   if (audio) {
@@ -222,7 +281,6 @@ function playBGM(id) {
   }
 }
 
-// ฟังก์ชันหยุดเพลง Background (หยุดและกรอกลับไปที่ 0)
 function stopBGM(id) {
   const audio = $(id);
   if (audio) {
@@ -231,7 +289,6 @@ function stopBGM(id) {
   }
 }
 
-// ฟังก์ชันหยุดชั่วคราว (Pause ไม่ต้องกรอกลับ)
 function pauseBGM(id) {
   const audio = $(id);
   if (audio) {
@@ -241,8 +298,7 @@ function pauseBGM(id) {
 
 function initAudioContext() {
   const bg = $("bgMenu");
-  // ถ้าอยู่ที่หน้าเมนู และเพลงยังไม่เล่น ให้เล่นเพลงเมนู
-  if (bg && bg.paused && document.getElementById('menu').classList.contains('active')) {
+  if (bg && bg.paused) {
     bg.volume = 0.5;
     bg.play().catch(()=>{});
   }
@@ -257,15 +313,11 @@ function showScreen(id){
 
 function startGame(){
   playSFX('sndClick');
-  
-  // 1. หยุดเพลงเมนูทันที (เงียบ)
   stopBGM('bgMenu');
-  stopBGM('bgGame'); // กันเหนียว หยุดเพลงเกมด้วย
-  
+  stopBGM('bgGame');
   score=0; heart=3; 
   $("score").textContent=score;
   $("heart").textContent=heart;
-  
   startCountdown();
 }
 
@@ -273,7 +325,7 @@ function startCountdown(){
   showScreen('countdown');
   let c=3;
   $("countNum").textContent=c;
-  playSFX('sndClick'); // เสียงติ๊ด (เงียบเพลง Background)
+  playSFX('sndClick');
   
   clearInterval(countdownTimer);
   countdownTimer=setInterval(()=>{
@@ -296,7 +348,6 @@ function skipCountdown(){
 
 function showGame(){
   showScreen('game');
-  // 2. เริ่มเพลงเกมตอนเข้าสู่หน้าเล่นเกมเท่านั้น
   playBGM('bgGame');
   nextQuestion();
 }
@@ -304,7 +355,6 @@ function showGame(){
 function pauseGame(){ 
   playSFX('sndClick');
   paused=true; 
-  // 3. กดหยุดเกม -> หยุดเพลงชั่วคราว (Pause)
   pauseBGM('bgGame');
   showScreen('pause'); 
 }
@@ -312,7 +362,6 @@ function pauseGame(){
 function resumeGame(){ 
   playSFX('sndClick');
   paused=false; 
-  // 4. กดเล่นต่อ -> เล่นเพลงต่อ (Resume)
   const bg = $("bgGame");
   if(bg) bg.play().catch(()=>{});
   showScreen('game'); 
@@ -321,11 +370,8 @@ function resumeGame(){
 function backMenu(){ 
   playSFX('sndClick');
   clearInterval(timer); 
-  
-  // 5. กลับหน้าหลัก -> หยุดเพลงเกมสนิท -> เล่นเพลงเมนู
   stopBGM('bgGame');
   playBGM('bgMenu');
-  
   $("menuHighScore").textContent = highScore; 
   showScreen('menu'); 
 }
@@ -383,8 +429,6 @@ function fail(){
 
 function gameOver(){
   clearInterval(timer);
-  
-  // 6. จบเกม -> หยุดเพลงเกม
   stopBGM('bgGame');
   playSFX('sndOver');
   
