@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Math Block Choice - Pro</title>
+<title>Math Block Choice</title>
 <style>
 button { touch-action: manipulation; }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -12,52 +12,75 @@ body{
   background:#f9fafb;
   height:100vh;
   overflow:hidden;
+  transition:background .3s;
   user-select: none; -webkit-user-select: none;
 }
+
 #intro-overlay {
-  position: fixed; inset: 0; background: rgba(255,255,255,0.85);
+  position: fixed; inset: 0; background-color: rgba(255, 255, 255, 0.85);
   z-index: 9999; display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
+  cursor: pointer; opacity: 1; transition: opacity 0.6s, visibility 0.6s;
 }
 #intro-overlay p {
   font-size: 28px; font-weight: bold; color: #374151;
-  padding: 20px 30px; background: white; border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1); animation: pulse 2s infinite;
+  padding: 20px 30px; background: rgba(255,255,255,0.9);
+  border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  animation: pulse 2s infinite;
 }
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
 #intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
 .screen{ display:none; height:100vh; width:100%; flex-direction:column; align-items:center; justify-content:center; }
 .active{ display:flex; }
+
+.menu-screen{ position:relative; background:#ffffff; overflow:hidden; }
+.math-bg{ position:absolute; inset:0; pointer-events:none; }
+.math-bg span{
+  position:absolute; font-size:90px; font-weight:900;
+  color:#e5e7eb; opacity:0.9; animation:float 6s ease-in-out infinite;
+}
+.math-bg span:nth-child(1){top:8%;left:12%}
+.math-bg span:nth-child(2){top:22%;right:10%}
+.math-bg span:nth-child(3){bottom:25%;left:8%}
+.math-bg span:nth-child(4){bottom:18%;right:16%}
+.math-bg span:nth-child(5){top:55%;left:45%}
+.math-bg span:nth-child(6){top:70%;right:35%}
+@keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+.menu-content{ position:relative; z-index:2; text-align:center; padding:20px; }
+.logo{ font-size:56px; font-weight:900; line-height:1.1; margin-bottom:14px; }
+.subtitle{ color:#6b7280; margin-bottom:20px; }
+.highscore-box {
+  background: #f3f4f6; padding: 8px 16px; border-radius: 12px;
+  display: inline-block; margin-bottom: 30px; font-weight: 600; color: #4b5563;
+}
+
 button.primary{
-  background:#2563eb; color:white; font-size:20px; padding:16px 44px;
-  border-radius:20px; border:none; cursor:pointer;
+  background:#2563eb; color:white; font-size:20px;
+  padding:16px 44px; border-radius:20px; border:none; cursor:pointer;
 }
 .big{font-size:64px;font-weight:800}
-.highscore-box { background: #f3f4f6; padding: 8px 16px; border-radius: 12px; margin-bottom: 30px; }
-
 .hud{
-  position:fixed; top:0; width:100%; padding:10px 14px;
+  position:fixed; top:0; left:0; width:100%; padding:10px 14px;
   display:flex; justify-content:space-between; align-items:center;
   background:#ffffffcc; backdrop-filter:blur(6px); z-index:10;
 }
-.game{ padding-top:70px; text-align:center; width: 100%; max-width: 420px; }
-.question{ font-size:40px; margin:30px 0; transition: color 0.3s; }
+.game{ padding-top:70px; width:100%; max-width:420px; text-align:center; }
+.question{ font-size:40px; margin:30px 0; transition: 0.3s; }
 .choices{ display:grid; grid-template-columns:repeat(2,140px); gap:20px; justify-content:center; }
 .choice{
-  width:140px; height:80px; font-size:28px; color:white; border:none;
-  border-radius:16px; background:#2563eb; transition: 0.2s;
+  width:140px; height:80px; font-size:28px; color:white;
+  border-radius:16px; border:none; background:#2563eb; transition: 0.2s;
 }
 
-/* Bonus Styles */
-.bonus-mode .question { color: #d97706; font-weight: 900; text-shadow: 0 0 10px #fde68a; }
-.bonus-mode .choice { background: #d97706 !important; box-shadow: 0 0 15px #fbbf24; }
-.bonus-msg { color: #d97706; font-weight: bold; display: none; margin-bottom: 10px; }
+.gold-mode .question { color: #d97706; font-weight: 900; text-shadow: 0 0 10px #fde68a; }
+.gold-mode .choice { background: #d97706 !important; box-shadow: 0 0 15px #fbbf24; }
+.bonus-label { color: #d97706; font-weight: bold; display: none; margin-bottom: 10px; }
 
 .success-pop { animation: successPop 0.4s; background: #22c55e !important; }
 @keyframes successPop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
 .error-shake { animation: errorShake 0.4s; background: #ef4444 !important; }
-@keyframes errorShake { 0%,100%{transform:translateX(0)} 25%{-8px} 50%{8px} 75%{-8px} }
+@keyframes errorShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 50%{transform:translateX(8px)} 75%{transform:translateX(-8px)} }
 </style>
 </head>
 <body>
@@ -66,24 +89,28 @@ button.primary{
   <p>แตะหน้าจอเพื่อเริ่มเกม</p>
 </div>
 
-<div id="menu" class="screen active">
-  <h1 style="font-size:48px; margin-bottom:10px">Math Block</h1>
-  <div class="highscore-box">🏆 สถิติสูงสุด: <span id="menuHighScore">0</span></div>
-  <button class="primary" onclick="startGame()">เริ่มเกม</button>
+<div id="menu" class="screen active menu-screen">
+  <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span></div>
+  <div class="menu-content">
+    <h1 class="logo">Math<br>Block<br>Choice</h1>
+    <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
+    <div class="highscore-box">🏆 สถิติสูงสุด: <span id="menuHighScore">0</span></div><br>
+    <button class="primary" onclick="startGame()">เริ่มเกม</button>
+  </div>
 </div>
 
 <div id="countdown" class="screen">
-  <div class="big" id="countNum">3</div>
+  <div class="big" id="countNum">3</div><p>เตรียมพร้อม</p>
 </div>
 
 <div id="game" class="screen">
   <div class="hud">
     <div>❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span></div>
     <div style="font-weight:bold">⏱ <span id="time">10</span></div>
-    <button onclick="pauseGame()" style="padding:5px 10px; border-radius:8px; border:none">หยุด</button>
+    <button onclick="pauseGame()" style="background:#e5e7eb; padding:6px 12px; border-radius:10px; border:none">หยุด</button>
   </div>
   <div class="game" id="gameArea">
-    <div id="bonusMsg" class="bonus-msg">✨ BONUS ROUND: รับหัวใจคืน! ✨</div>
+    <div id="bonusLabel" class="bonus-label">✨ BONUS: +1 HEART ✨</div>
     <div class="question" id="question"></div>
     <div class="choices">
       <button id="btn0" class="choice" onclick="choose(0)"></button>
@@ -102,14 +129,15 @@ button.primary{
 
 <div id="over" class="screen">
   <div class="big">GAME OVER</div>
-  <p>คะแนนของคุณ: <span id="final">0</span></p>
-  <p id="newRecordMsg" style="color:orange; display:none">สถิติใหม่!</p><br>
+  <p style="font-size:20px; margin:10px 0;">คะแนนของคุณ: <span id="final" style="font-weight:bold">0</span></p>
+  <p id="newRecordMsg" style="color:orange; font-weight:bold; display:none">🎉 สถิติใหม่! 🎉</p><br>
   <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
   <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
 <script>
-let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, isBonus=false;
+let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0;
+let isBonus=false, bonusCooldown=false, lastQuestionText="";
 let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
 const $ = id => document.getElementById(id);
 $("menuHighScore").textContent = highScore;
@@ -152,6 +180,7 @@ async function handleTapStart() {
   const snds = [['menu','sound/bg_menu.mp3'],['game','sound/bg_game.mp3'],['bonus','sound/bonus.mp3'],['click','sound/click.mp3'],['correct','sound/correct.mp3'],['wrong','sound/wrong.mp3'],['over','sound/gameover.mp3']];
   await Promise.all(snds.map(s => loadSound(s[0], s[1])));
   $("intro-overlay").classList.add("hidden");
+  playSFX('click');
   playBGM('menu');
 }
 
@@ -160,64 +189,73 @@ function showScreen(id){
   $(id).classList.add('active');
 }
 
+function saveHighScore() {
+  if (score > highScore) { highScore = score; localStorage.setItem('mathBlockHighScore', highScore); return true; }
+  return false;
+}
+
 function startGame(){
-  score=0; heart=3; isBonus=false;
+  playSFX('click'); stopAllBGM();
+  score=0; heart=3; isBonus=false; bonusCooldown=false; lastQuestionText="";
   $("score").textContent=score; $("heart").textContent=heart;
   showScreen('countdown');
   let c=3; $("countNum").textContent=c;
   let ct = setInterval(()=>{
     c--;
-    if(c>0) $("countNum").textContent=c;
+    if(c>0) { $("countNum").textContent=c; playSFX('click'); }
     else { clearInterval(ct); showGame(); }
   },1000);
 }
 
-function showGame(){
-  paused=false; showScreen('game'); playBGM('game'); nextQuestion();
-}
-
-function pauseGame(){ paused=true; showScreen('pause'); }
-function resumeGame(){ paused=false; showScreen('game'); }
+function showGame(){ paused=false; showScreen('game'); nextQuestion(); }
+function pauseGame(){ playSFX('click'); paused=true; showScreen('pause'); }
+function resumeGame(){ playSFX('click'); paused=false; showScreen('game'); }
 
 function backMenu(){ 
-  clearInterval(timer); saveScore(); stopAllBGM(); playBGM('menu');
-  $("menuHighScore").textContent = highScore; showScreen('menu'); 
-}
-
-function saveScore() {
-  if (score > highScore) { highScore = score; localStorage.setItem('mathBlockHighScore', highScore); return true; }
-  return false;
+  playSFX('click'); clearInterval(timer); saveHighScore();
+  stopAllBGM(); playBGM('menu');
+  $("menuHighScore").textContent = highScore;
+  showScreen('menu'); 
 }
 
 function nextQuestion(){
   clearInterval(timer);
   time=10; $("time").textContent=time;
-  isBonus = (heart < 3 && Math.random() < 0.2);
-  
-  // UI Reset & Bonus Check
-  $("gameArea").className = isBonus ? "game bonus-mode" : "game";
-  $("bonusMsg").style.display = isBonus ? "block" : "none";
-  if(isBonus) { playBGM('bonus'); } else { if(!bgSources['game']) playBGM('game'); }
   for(let i=0; i<4; i++) $("btn"+i).className = 'choice';
-
-  // Math Logic
-  let numCount = 2;
-  if (isBonus) numCount = 4;
-  else if (score > 300) numCount = 3;
-  else if (score > 100) numCount = Math.random() < 0.6 ? 3 : 2;
-
-  let expr = "", ans = 0;
-  for(let i=0; i<numCount; i++){
-    let n = Math.floor(Math.random()*10)+1;
-    if(i===0) { expr = n; ans = n; }
-    else {
-      let op = Math.random() > 0.5 ? "+" : "-";
-      expr += ` ${op} ${n}`;
-      ans = op === "+" ? ans + n : ans - n;
-    }
+  
+  // เงื่อนไขสุ่มข้อโบนัส (ต้องไม่ติดกัน)
+  if (heart < 3 && !bonusCooldown && Math.random() < 0.2) {
+    isBonus = true;
+    bonusCooldown = true; // ล็อกไว้สำหรับข้อหน้า
+  } else {
+    isBonus = false;
+    bonusCooldown = false; // ปลดล็อก
   }
 
-  $("question").textContent = expr + " = ?";
+  $("gameArea").className = isBonus ? "game gold-mode" : "game";
+  $("bonusLabel").style.display = isBonus ? "block" : "none";
+  if(isBonus) playBGM('bonus'); else if(!bgSources['game']) playBGM('game');
+
+  let currentExpr = "", ans = 0;
+  
+  // ระบบป้องกันโจทย์ซ้ำ
+  do {
+    let numCount = isBonus ? 4 : (score > 300 ? 3 : (score > 100 && Math.random() < 0.6 ? 3 : 2));
+    currentExpr = "";
+    for(let i=0; i<numCount; i++){
+      let n = Math.floor(Math.random()*10)+1;
+      if(i===0) { currentExpr = n; ans = n; }
+      else {
+        let op = Math.random() > 0.5 ? "+" : "-";
+        currentExpr += ` ${op} ${n}`;
+        ans = (op === "+") ? ans + n : ans - n;
+      }
+    }
+  } while (currentExpr === lastQuestionText); // ถ้าซ้ำข้อเดิมให้สุ่มใหม่
+  
+  lastQuestionText = currentExpr;
+  $("question").textContent = currentExpr + " = ?";
+
   let answers = [ans];
   while(answers.length<4){
     let w = ans + (Math.floor(Math.random()*11)-5);
@@ -241,7 +279,7 @@ function choose(idx){
     playSFX('correct');
     $("btn"+idx).classList.add('success-pop');
     score += 10;
-    if(isBonus) { heart = Math.min(3, heart + 1); }
+    if(isBonus) heart = Math.min(3, heart + 1);
     $("score").textContent = score; $("heart").textContent = heart;
     setTimeout(nextQuestion, 400);
   } else {
@@ -252,9 +290,7 @@ function choose(idx){
 }
 
 function fail(idx){
-  if(!isBonus) {
-    heart--; $("heart").textContent = heart;
-  }
+  if(!isBonus) { heart--; $("heart").textContent = heart; }
   if(heart <= 0) setTimeout(gameOver, 400);
   else setTimeout(nextQuestion, 400);
 }
@@ -262,9 +298,8 @@ function fail(idx){
 function gameOver(){
   clearInterval(timer); stopAllBGM(); playSFX('over');
   $("final").textContent = score;
-  let isNew = saveScore();
+  let isNew = saveHighScore();
   $("newRecordMsg").style.display = isNew ? "block" : "none";
-  $("bestScore").textContent = highScore;
   showScreen('over');
 }
 </script>
