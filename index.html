@@ -34,13 +34,14 @@ body{
 .screen{ display:none; height:100vh; width:100%; }
 .menu-screen.active { display: flex; }
 .active{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
-button{ border:none; cursor:pointer; }
+button{ border:none; cursor:pointer; position: relative; }
 button.primary{
   background:#2563eb; color:white; font-size:20px;
   padding:16px 44px; border-radius:20px;
-  transition: transform 0.1s, background 0.2s;
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s;
+  will-change: transform; /* เพิ่มประสิทธิภาพการขยับ */
 }
-button.primary:active { transform: scale(0.95); background: #1d4ed8; }
+button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; }
 .big{font-size:64px;font-weight:800}
 .menu-screen{ position:relative; background:#ffffff; overflow:hidden; }
 .math-bg{ position:absolute; inset:0; pointer-events:none; }
@@ -68,7 +69,7 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
   background:#ffffffcc; backdrop-filter:blur(6px); z-index:10;
 }
 .hud-left{font-size:14px} .hud-center{font-size:18px;font-weight:700}
-.hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; }
+.hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; transition: transform 0.2s; }
 .game{ padding-top:70px; width:100%; max-width:420px; text-align:center; }
 
 /* Bonus Mode Styles */
@@ -80,17 +81,25 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
 .choices{ display:grid; grid-template-columns:repeat(2,140px); gap:20px; justify-content:center; }
 .choice{
   width:140px; height:80px; font-size:28px; color:white;
-  border-radius:16px; transition:background 0.2s, transform 0.1s; background:#2563eb;
-}
-/* Hover Effect: ปุ่มนูนขึ้น */
-@media(hover: hover) {
-  .choice:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(37,99,235,0.3); }
-  .gold-mode .choice:hover { box-shadow: 0 6px 12px rgba(217,119,6,0.4); }
+  border-radius:16px; 
+  background:#2563eb; position: relative;
+  /* ใช้ transition สำหรับตอนปล่อยเมาส์ให้กลับที่เดิมนุ่มๆ */
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, background 0.2s;
+  will-change: transform;
 }
 
-.success-pop { animation: successPop 0.4s ease-out; background-color: #22c55e !important; }
+/* Hover Effect แบบ CSS ปกติ (Fallback) และสำหรับเงา */
+.choice:hover, .primary:hover { 
+  box-shadow: 0 12px 20px rgba(37,99,235,0.35);
+  z-index: 10;
+}
+.gold-mode .choice:hover { 
+  box-shadow: 0 12px 20px rgba(217,119,6,0.45); 
+}
+
+.success-pop { animation: successPop 0.4s ease-out; background-color: #22c55e !important; pointer-events: none; }
 @keyframes successPop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
-.error-shake { animation: errorShake 0.4s; background-color: #ef4444 !important; }
+.error-shake { animation: errorShake 0.4s; background-color: #ef4444 !important; pointer-events: none; }
 @keyframes errorShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); } }
 .score-info { font-size: 20px; margin: 10px 0 30px; color: #374151; }
 .new-record { color: #ea580c; font-weight: bold; display: none; }
@@ -155,7 +164,7 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
 <script>
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
 let isBonus=false, bonusCooldown=false, lastQuestionText="";
-let inputLocked = false; // ตัวแปรป้องกันการกดรัว
+let inputLocked = false;
 let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
 const $ = id => document.getElementById(id);
 $("menuHighScore").textContent = highScore;
@@ -238,6 +247,7 @@ async function handleTapStart() {
   $("intro-overlay").classList.add("hidden");
   playSFX('click');
   playBGM('menu');
+  initMagneticButtons(); // เริ่มระบบปุ่มลอย
 }
 
 function showScreen(id){
@@ -306,11 +316,12 @@ function calculate(a, op, b) {
 
 function nextQuestion(){
   clearInterval(timer);
-  inputLocked = false; // ปลดล็อคปุ่มสำหรับข้อใหม่
+  inputLocked = false; 
   time=10; $("time").textContent=time;
   for(let i=0; i<4; i++) {
-    $("btn"+i).className = 'choice';
-    $("btn"+i).style.transform = ""; // Reset transform
+    let btn = $("btn"+i);
+    btn.className = 'choice';
+    btn.style.transform = ""; // Reset transform
   }
 
   if (heart < 3 && !bonusCooldown && Math.random() < 0.1) {
@@ -342,9 +353,7 @@ function nextQuestion(){
       let a=Math.floor(Math.random()*15)+1, b=Math.floor(Math.random()*10)+1, c=Math.floor(Math.random()*10)+1;
       let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)];
       
-      // สุ่มว่าจะใส่วงเล็บหรือไม่ (50/50)
       if(Math.random() > 0.5) {
-         // มีวงเล็บ
          if (Math.random() > 0.5) {
            ans = calculate(calculate(a, op1, b), op2, c);
            expr = `(${a} ${op1} ${b}) ${op2} ${c}`;
@@ -353,16 +362,12 @@ function nextQuestion(){
            expr = `${a} ${op2} (${b} ${op1} ${c})`;
          }
       } else {
-         // ไม่มีวงเล็บ (ท้าทาย)
          expr = `${a} ${op1} ${b} ${op2} ${c}`;
-         // ใช้ Function เพื่อคำนวณตามหลักคณิตศาสตร์จริง (BODMAS)
          let safeExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
          ans = new Function('return ' + safeExpr)();
-         // ปัดเศษกรณีหาร
          ans = Math.floor(ans); 
       }
     } else {
-      // Level 4
       let a=Math.floor(Math.random()*10)+2, b=Math.floor(Math.random()*10)+2, c=Math.floor(Math.random()*10)+1, d=Math.floor(Math.random()*10)+1;
       let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)], op3=["+","-"][Math.floor(Math.random()*2)];
       
@@ -370,7 +375,6 @@ function nextQuestion(){
           ans = calculate(calculate(a, op1, b), op2, calculate(c, op3, d));
           expr = `(${a} ${op1} ${b}) ${op2} (${c} ${op3} ${d})`;
       } else {
-          // ไม่มีวงเล็บ
           expr = `${a} ${op1} ${b} ${op2} ${c} ${op3} ${d}`;
           let safeExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
           ans = new Function('return ' + safeExpr)();
@@ -400,23 +404,21 @@ function nextQuestion(){
 }
 
 function choose(idx){
-  // ป้องกันการกดเมื่อ หยุดเกม, ล็อคอินพุต, หรือตายไปแล้ว
   if(paused || inputLocked || heart <= 0) return;
   
-  // *** สำคัญ: หยุดเวลาทันทีที่กดเลือก เพื่อแก้บั๊ก 1 วินาที ***
   clearInterval(timer);
-  inputLocked = true; // ล็อคทันทีกันกดรัว
+  inputLocked = true;
 
   if(idx===correctIndex){
     playSFX('correct');
     $("btn"+idx).classList.add('success-pop');
     score+=10; $("score").textContent=score;
     if(isBonus) { heart = Math.min(3, heart + 1); $("heart").textContent=heart; }
-    setTimeout(nextQuestion, 400); // inputLocked จะถูกปลดใน nextQuestion
+    setTimeout(nextQuestion, 400); 
   } else {
     playSFX('wrong');
     $("btn"+idx).classList.add('error-shake');
-    fail(idx); // ส่งต่อให้ fail จัดการ
+    fail(idx); 
   }
 }
 
@@ -425,11 +427,9 @@ function fail(idx){
   $("heart").textContent=heart;
   
   if(heart<=0) { 
-    // ถ้าตายแล้ว ไม่ต้องปลดล็อค รอไปหน้า Game Over เลย
     inputLocked = true;
     setTimeout(gameOver, 400); 
   } else { 
-    // ถ้ายังไม่ตาย รออนิเมชั่นแล้วไปข้อต่อไป
     if(idx !== null) setTimeout(nextQuestion, 400); 
     else nextQuestion(); 
   }
@@ -442,6 +442,33 @@ function gameOver(){
   $("bestScore").textContent = highScore;
   $("newRecordMsg").style.display = isNew ? "block" : "none";
   showScreen('over');
+}
+
+// --- ฟังก์ชันสำหรับ Magnetic Effect ---
+function initMagneticButtons() {
+  const btns = document.querySelectorAll('button.choice, button.primary');
+  
+  btns.forEach(btn => {
+    btn.addEventListener('pointermove', function(e) {
+      // หยุดถ้าปุ่มมีอนิเมชั่นอื่นอยู่
+      if(btn.classList.contains('success-pop') || btn.classList.contains('error-shake') || paused) return;
+
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+
+      // ปรับความแรงของแม่เหล็ก (0.2 คือความแรง) และ Scale
+      btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px) scale(1.05)`;
+      btn.style.transition = 'transform 0.05s linear'; // ขยับเร็วๆ ตามเมาส์
+    });
+
+    btn.addEventListener('pointerleave', function() {
+      // กลับที่เดิม
+      if(btn.classList.contains('success-pop') || btn.classList.contains('error-shake')) return;
+      btn.style.transform = ''; 
+      btn.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; // เด้งกลับนุ่มๆ
+    });
+  });
 }
 </script>
 </body>
