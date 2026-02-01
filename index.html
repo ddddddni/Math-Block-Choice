@@ -2,10 +2,13 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Math Block Choice - Tap to Start</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Math Block Choice</title>
 
 <style>
+/* ลดดีเลย์การแตะบนมือถือ */
+button { touch-action: manipulation; }
+
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:system-ui,sans-serif;
@@ -13,92 +16,48 @@ body{
   height:100vh;
   overflow:hidden;
   transition:background .3s;
+  user-select: none; -webkit-user-select: none;
 }
 
-/* --- ส่วนที่เพิ่มใหม่: หน้าจอ Tap to Start --- */
+/* หน้ากาก Intro Overlay */
 #intro-overlay {
-  position: fixed;
-  inset: 0; /* คลุมทั่วทั้งหน้าจอ (บน ขวา ล่าง ซ้าย = 0) */
-  background-color: rgba(255, 255, 255, 0.85); /* สีขาวโปร่งแสง ทำให้ฉากหลังดูจางๆ */
-  z-index: 9999; /* อยู่ชั้นบนสุด */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed; inset: 0;
+  background-color: rgba(255, 255, 255, 0.85);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  
-  /* การตั้งค่าอนิเมชันตอนหายไป */
-  opacity: 1;
-  transition: opacity 0.6s ease-out, visibility 0.6s;
+  opacity: 1; transition: opacity 0.6s ease-out, visibility 0.6s;
 }
-
-/* ข้อความตรงกลาง */
 #intro-overlay p {
-  font-size: 28px;
-  font-weight: bold;
-  color: #374151;
-  padding: 20px 30px;
-  background: rgba(255,255,255,0.9);
-  border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  animation: pulseText 2s infinite; /* เพิ่มลูกเล่นให้ข้อความขยับนิดๆ */
+  font-size: 28px; font-weight: bold; color: #374151;
+  padding: 20px 30px; background: rgba(255,255,255,0.9);
+  border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  animation: pulseText 2s infinite;
 }
-
-@keyframes pulseText {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-/* คลาสสำหรับสั่งให้ซ่อน (Fade Out) */
-#intro-overlay.hidden {
-  opacity: 0; /* จางหายไป */
-  visibility: hidden; /* ซ่อนไม่ให้เกะกะการกดปุ่มอื่นหลังจากจางหายไปแล้ว */
-  pointer-events: none; /* ป้องกันไม่ให้กดโดนระหว่างกำลังจาง */
-}
+@keyframes pulseText { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+#intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
 /* ---------- COMMON ---------- */
-.screen{
-  display:none;
-  height:100vh;
-  width:100%;
-}
-/* หน้าเมนูหลักต้องแสดงอยู่ตลอดเพื่อให้เป็นพื้นหลังแบบจางๆ */
-.menu-screen.active {
-    display: flex;
-}
-
-.active{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
+.screen{ display:none; height:100vh; width:100%; }
+.menu-screen.active { display: flex; }
+.active{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
 
 button{ border:none; cursor:pointer; }
 button.primary{
-  background:#2563eb;
-  color:white;
-  font-size:20px;
-  padding:16px 44px;
-  border-radius:20px;
+  background:#2563eb; color:white; font-size:20px;
+  padding:16px 44px; border-radius:20px;
   transition: transform 0.1s, background 0.2s;
 }
-button.primary:active {
-  transform: scale(0.95);
-  background: #1d4ed8;
-}
+button.primary:active { transform: scale(0.95); background: #1d4ed8; }
 
 .big{font-size:64px;font-weight:800}
 
-/* ---------- MENU DESIGN ---------- */
+/* ---------- MENU ---------- */
 .menu-screen{ position:relative; background:#ffffff; overflow:hidden; }
 .math-bg{ position:absolute; inset:0; pointer-events:none; }
 .math-bg span{
-  position:absolute;
-  font-size:90px;
-  font-weight:900;
-  color:#e5e7eb;
-  opacity:0.9;
-  animation:float 6s ease-in-out infinite;
+  position:absolute; font-size:90px; font-weight:900;
+  color:#e5e7eb; opacity:0.9; animation:float 6s ease-in-out infinite;
 }
 .math-bg span:nth-child(1){top:8%;left:12%}
 .math-bg span:nth-child(2){top:22%;right:10%}
@@ -106,64 +65,36 @@ button.primary:active {
 .math-bg span:nth-child(4){bottom:18%;right:16%}
 .math-bg span:nth-child(5){top:55%;left:45%}
 .math-bg span:nth-child(6){top:70%;right:35%}
-
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-14px)}
-}
+@keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
 
 .menu-content{ position:relative; z-index:2; text-align:center; padding:20px; }
 .logo{ font-size:56px; font-weight:900; line-height:1.1; margin-bottom:14px; }
 .subtitle{ color:#6b7280; margin-bottom:20px; }
-
 .highscore-box {
-  background: #f3f4f6;
-  padding: 8px 16px;
-  border-radius: 12px;
-  display: inline-block;
-  margin-bottom: 30px;
-  font-weight: 600;
-  color: #4b5563;
+  background: #f3f4f6; padding: 8px 16px; border-radius: 12px;
+  display: inline-block; margin-bottom: 30px; font-weight: 600; color: #4b5563;
 }
 
-/* ---------- HUD ---------- */
+/* ---------- HUD & GAME ---------- */
 .hud{
-  position:fixed;
-  top:0;left:0;
-  width:100%;
-  padding:10px 14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#ffffffcc;
-  backdrop-filter:blur(6px);
-  z-index:10;
+  position:fixed; top:0;left:0; width:100%; padding:10px 14px;
+  display:flex; justify-content:space-between; align-items:center;
+  background:#ffffffcc; backdrop-filter:blur(6px); z-index:10;
 }
-.hud-left{font-size:14px}
-.hud-center{font-size:18px;font-weight:700}
+.hud-left{font-size:14px} .hud-center{font-size:18px;font-weight:700}
 .hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; }
 
-/* ---------- GAME ---------- */
 .game{ padding-top:70px; width:100%; max-width:420px; text-align:center; }
 .question{ font-size:40px; margin:30px 0; }
 .choices{ display:grid; grid-template-columns:repeat(2,140px); gap:20px; justify-content:center; }
 .choice{
   width:140px; height:80px; font-size:28px; color:white;
-  border-radius:16px; transition:transform .15s; background:#2563eb;
+  border-radius:16px; transition:transform 0.1s; background:#2563eb;
 }
 .choice:active{transform:scale(.9)}
 
-/* ---------- GAME OVER INFO ---------- */
-.score-info {
-  font-size: 20px;
-  margin: 10px 0 30px;
-  color: #374151;
-}
-.new-record {
-  color: #ea580c;
-  font-weight: bold;
-  display: none;
-}
+.score-info { font-size: 20px; margin: 10px 0 30px; color: #374151; }
+.new-record { color: #ea580c; font-weight: bold; display: none; }
 </style>
 </head>
 
@@ -173,34 +104,25 @@ button.primary:active {
   <p>แตะหน้าจอเพื่อเริ่มเกม</p>
 </div>
 
-<audio id="bgMenu" loop src="sound/bg_menu.mp3"></audio>
-<audio id="bgGame" loop src="sound/bg_game.mp3"></audio>
-<audio id="sndClick" src="sound/click.mp3"></audio>
-<audio id="sndCorrect" src="sound/correct.mp3"></audio>
-<audio id="sndWrong" src="sound/wrong.mp3"></audio>
-<audio id="sndOver" src="sound/gameover.mp3"></audio>
+<audio id="bgMenu" loop preload="auto" src="sound/bg_menu.mp3"></audio>
+<audio id="bgGame" loop preload="auto" src="sound/bg_game.mp3"></audio>
+<audio id="sndClick" preload="auto" src="sound/click.mp3"></audio>
+<audio id="sndCorrect" preload="auto" src="sound/correct.mp3"></audio>
+<audio id="sndWrong" preload="auto" src="sound/wrong.mp3"></audio>
+<audio id="sndOver" preload="auto" src="sound/gameover.mp3"></audio>
 
 <div id="menu" class="screen active menu-screen">
-  <div class="math-bg">
-    <span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span>
-  </div>
+  <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span></div>
   <div class="menu-content">
     <h1 class="logo">Math<br>Block<br>Choice</h1>
     <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
-    
-    <div class="highscore-box">
-      🏆 สถิติสูงสุด: <span id="menuHighScore">0</span>
-    </div>
-    <br>
-    
+    <div class="highscore-box">🏆 สถิติสูงสุด: <span id="menuHighScore">0</span></div><br>
     <button class="primary" onclick="startGame()">เริ่มเกม</button>
   </div>
 </div>
 
 <div id="countdown" class="screen">
-  <div class="big" id="countNum">3</div>
-  <p>เตรียมพร้อม</p>
-  <br>
+  <div class="big" id="countNum">3</div><p>เตรียมพร้อม</p><br>
   <button class="primary" onclick="skipCountdown()">ข้าม</button>
 </div>
 
@@ -208,9 +130,7 @@ button.primary:active {
   <div class="hud">
     <div class="hud-left">❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span></div>
     <div class="hud-center">⏱ <span id="time">10</span></div>
-    <div class="hud-right">
-      <button onclick="pauseGame()">หยุด</button>
-    </div>
+    <div class="hud-right"><button onclick="pauseGame()">หยุด</button></div>
   </div>
   <div class="game">
     <div class="question" id="question"></div>
@@ -231,15 +151,11 @@ button.primary:active {
 
 <div id="over" class="screen">
   <div class="big">GAME OVER</div>
-  
   <div class="score-info">
     <p>คะแนนของคุณ: <span id="final" style="font-weight:bold; font-size:28px;">0</span></p>
-    <p style="font-size:16px; color:#6b7280; margin-top:5px;">
-      🏆 สถิติสูงสุด: <span id="bestScore">0</span>
-    </p>
+    <p style="font-size:16px; color:#6b7280; margin-top:5px;">🏆 สถิติสูงสุด: <span id="bestScore">0</span></p>
     <p id="newRecordMsg" class="new-record">🎉 ยินดีด้วย! สถิติใหม่ 🎉</p>
   </div>
-
   <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
   <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
@@ -251,57 +167,40 @@ const $ = id => document.getElementById(id);
 
 $("menuHighScore").textContent = highScore;
 
-// --- ฟังก์ชันใหม่สำหรับจัดการการแตะครั้งแรก ---
+// ฟังก์ชันเมื่อแตะหน้า Intro
 function handleTapStart() {
-  // 1. เริ่มต้นระบบเสียง (เหมือนเดิม)
   initAudioContext();
-  
-  // 2. สั่งให้หน้ากาก Intro ค่อยๆ จางหายไป
-  const overlay = $("intro-overlay");
-  overlay.classList.add("hidden");
-  
-  // เล่นเสียงคลิกตอบรับการแตะ
+  $("intro-overlay").classList.add("hidden");
   playSFX('sndClick');
 }
 
-// --- ระบบเสียง (Audio System) ---
+// --- ระบบเสียงมาตรฐาน (Standard Audio) ---
 function playSFX(id) {
   const audio = $(id);
   if (audio) {
-    audio.currentTime = 0;
+    audio.currentTime = 0; // รีเซ็ตเสียงให้เริ่มใหม่ทันที
     audio.play().catch(()=>{});
   }
 }
 
 function playBGM(id) {
   const audio = $(id);
-  if (audio) {
-    audio.volume = 0.5;
-    audio.play().catch(()=>{});
-  }
+  if (audio) { audio.volume = 0.5; audio.play().catch(()=>{}); }
 }
 
 function stopBGM(id) {
   const audio = $(id);
-  if (audio) {
-    audio.pause();
-    audio.currentTime = 0;
-  }
+  if (audio) { audio.pause(); audio.currentTime = 0; }
 }
 
 function pauseBGM(id) {
   const audio = $(id);
-  if (audio) {
-    audio.pause();
-  }
+  if (audio) { audio.pause(); }
 }
 
 function initAudioContext() {
   const bg = $("bgMenu");
-  if (bg && bg.paused) {
-    bg.volume = 0.5;
-    bg.play().catch(()=>{});
-  }
+  if (bg && bg.paused) { bg.volume = 0.5; bg.play().catch(()=>{}); }
 }
 
 function showScreen(id){
@@ -309,78 +208,49 @@ function showScreen(id){
   $(id).classList.add('active');
 }
 
-// --- LOGIC GAME FLOW ---
-
+// --- LOGIC ---
 function startGame(){
   playSFX('sndClick');
-  stopBGM('bgMenu');
-  stopBGM('bgGame');
+  stopBGM('bgMenu'); stopBGM('bgGame'); // เงียบเสียงเพลง
   score=0; heart=3; 
-  $("score").textContent=score;
-  $("heart").textContent=heart;
+  $("score").textContent=score; $("heart").textContent=heart;
   startCountdown();
 }
 
 function startCountdown(){
   showScreen('countdown');
-  let c=3;
-  $("countNum").textContent=c;
-  playSFX('sndClick');
-  
+  let c=3; $("countNum").textContent=c; playSFX('sndClick');
   clearInterval(countdownTimer);
   countdownTimer=setInterval(()=>{
     c--;
-    if(c>0) { 
-      $("countNum").textContent=c; 
-      playSFX('sndClick'); 
-    } else { 
-      clearInterval(countdownTimer); 
-      showGame(); 
-    }
+    if(c>0) { $("countNum").textContent=c; playSFX('sndClick'); }
+    else { clearInterval(countdownTimer); showGame(); }
   },1000);
 }
 
-function skipCountdown(){ 
-  playSFX('sndClick');
-  clearInterval(countdownTimer); 
-  showGame(); 
-}
+function skipCountdown(){ playSFX('sndClick'); clearInterval(countdownTimer); showGame(); }
 
 function showGame(){
-  showScreen('game');
-  playBGM('bgGame');
-  nextQuestion();
+  showScreen('game'); playBGM('bgGame'); nextQuestion();
 }
 
-function pauseGame(){ 
-  playSFX('sndClick');
-  paused=true; 
-  pauseBGM('bgGame');
-  showScreen('pause'); 
-}
+function pauseGame(){ playSFX('sndClick'); paused=true; pauseBGM('bgGame'); showScreen('pause'); }
 
 function resumeGame(){ 
-  playSFX('sndClick');
-  paused=false; 
-  const bg = $("bgGame");
-  if(bg) bg.play().catch(()=>{});
+  playSFX('sndClick'); paused=false; 
+  const bg=$("bgGame"); if(bg) bg.play().catch(()=>{});
   showScreen('game'); 
 }
 
 function backMenu(){ 
-  playSFX('sndClick');
-  clearInterval(timer); 
-  stopBGM('bgGame');
-  playBGM('bgMenu');
-  $("menuHighScore").textContent = highScore; 
-  showScreen('menu'); 
+  playSFX('sndClick'); clearInterval(timer); 
+  stopBGM('bgGame'); playBGM('bgMenu');
+  $("menuHighScore").textContent = highScore; showScreen('menu'); 
 }
 
 function nextQuestion(){
   clearInterval(timer);
-  time=10;
-  $("time").textContent=time;
-  
+  time=10; $("time").textContent=time;
   const ops=["+","-","×","÷"];
   const op=ops[Math.floor(Math.random()*ops.length)];
   let a, b, ans;
@@ -401,8 +271,7 @@ function nextQuestion(){
 
   timer=setInterval(()=>{
     if(!paused){
-      time--;
-      $("time").textContent=time;
+      time--; $("time").textContent=time;
       if(time<=0) { playSFX('sndWrong'); fail(); }
     }
   },1000);
@@ -411,40 +280,26 @@ function nextQuestion(){
 function choose(idx){
   if(idx===correctIndex){
     playSFX('sndCorrect');
-    score+=10;
-    $("score").textContent=score;
-    nextQuestion();
+    score+=10; $("score").textContent=score; nextQuestion();
   } else {
-    playSFX('sndWrong');
-    fail();
+    playSFX('sndWrong'); fail();
   }
 }
 
 function fail(){
-  heart--;
-  $("heart").textContent=heart;
-  if(heart<=0) gameOver();
-  else nextQuestion();
+  heart--; $("heart").textContent=heart;
+  if(heart<=0) gameOver(); else nextQuestion();
 }
 
 function gameOver(){
-  clearInterval(timer);
-  stopBGM('bgGame');
-  playSFX('sndOver');
-  
+  clearInterval(timer); stopBGM('bgGame'); playSFX('sndOver');
   $("final").textContent=score;
-  
   const newRecordMsg = $("newRecordMsg");
   if(score > highScore) {
-    highScore = score;
-    localStorage.setItem('mathBlockHighScore', highScore);
+    highScore = score; localStorage.setItem('mathBlockHighScore', highScore);
     newRecordMsg.style.display = "block";
-  } else {
-    newRecordMsg.style.display = "none";
-  }
-
-  $("bestScore").textContent = highScore;
-  showScreen('over');
+  } else { newRecordMsg.style.display = "none"; }
+  $("bestScore").textContent = highScore; showScreen('over');
 }
 </script>
 </body>
