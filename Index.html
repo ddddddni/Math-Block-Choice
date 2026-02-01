@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Block Choice</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:system-ui,sans-serif;
+  background:#f9fafb;
+  height:100vh;
+  overflow:hidden;
+  transition:background .3s;
+}
+
+/* ---------- COMMON ---------- */
+.screen{
+  display:none;
+  height:100vh;
+  width:100%;
+}
+.active{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+button{
+  border:none;
+  cursor:pointer;
+}
+button.primary{
+  background:#2563eb;
+  color:white;
+  font-size:20px;
+  padding:16px 44px;
+  border-radius:20px;
+}
+.big{font-size:64px;font-weight:800}
+
+/* ---------- MENU DESIGN ---------- */
+.menu-screen{
+  position:relative;
+  background:#ffffff;
+  overflow:hidden;
+}
+
+/* math symbols background */
+.math-bg{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.math-bg span{
+  position:absolute;
+  font-size:90px;
+  font-weight:900;
+  color:#e5e7eb;
+  opacity:0.9;
+  animation:float 6s ease-in-out infinite;
+}
+
+.math-bg span:nth-child(1){top:8%;left:12%}
+.math-bg span:nth-child(2){top:22%;right:10%}
+.math-bg span:nth-child(3){bottom:25%;left:8%}
+.math-bg span:nth-child(4){bottom:18%;right:16%}
+.math-bg span:nth-child(5){top:55%;left:45%}
+.math-bg span:nth-child(6){top:70%;right:35%}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-14px)}
+}
+
+/* menu content */
+.menu-content{
+  position:relative;
+  z-index:2;
+  text-align:center;
+  padding:20px;
+}
+
+.logo{
+  font-size:56px;
+  font-weight:900;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+
+.subtitle{
+  color:#6b7280;
+  margin-bottom:36px;
+}
+
+/* ---------- HUD ---------- */
+.hud{
+  position:fixed;
+  top:0;left:0;
+  width:100%;
+  padding:10px 14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#ffffffcc;
+  backdrop-filter:blur(6px);
+  z-index:10;
+}
+.hud-left{font-size:14px}
+.hud-center{font-size:18px;font-weight:700}
+.hud-right button{
+  background:#e5e7eb;
+  padding:6px 12px;
+  border-radius:10px;
+}
+
+/* ---------- GAME ---------- */
+.game{
+  padding-top:70px;
+  width:100%;
+  max-width:420px;
+  text-align:center;
+}
+.question{
+  font-size:40px;
+  margin:30px 0;
+}
+.choices{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+}
+.choice{
+  width:140px;
+  height:80px;
+  font-size:28px;
+  color:white;
+  border-radius:16px;
+  transition:transform .15s;
+}
+.choice:active{transform:scale(.9)}
+.left{background:#f59e0b}
+.right{background:#2dd4bf}
+</style>
+</head>
+
+<body>
+
+<!-- ===== MENU ===== -->
+<div id="menu" class="screen active menu-screen">
+  <div class="math-bg">
+    <span>＋</span>
+    <span>−</span>
+    <span>×</span>
+    <span>÷</span>
+    <span>＋</span>
+    <span>×</span>
+  </div>
+
+  <div class="menu-content">
+    <h1 class="logo">Math<br>Block<br>Choice</h1>
+    <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
+    <button class="primary" onclick="startGame()">เริ่มเกม</button>
+  </div>
+</div>
+
+<!-- ===== COUNTDOWN ===== -->
+<div id="countdown" class="screen">
+  <div class="big" id="countNum">3</div>
+  <p>เตรียมพร้อม</p>
+  <br>
+  <button class="primary" onclick="skipCountdown()">ข้าม</button>
+</div>
+
+<!-- ===== GAME ===== -->
+<div id="game" class="screen">
+  <div class="hud">
+    <div class="hud-left">
+      ❤️ <span id="heart">3</span> |
+      🏆 <span id="score">0</span>
+    </div>
+    <div class="hud-center">
+      ⏱ <span id="time">10</span>
+    </div>
+    <div class="hud-right">
+      <button onclick="pauseGame()">หยุด</button>
+    </div>
+  </div>
+
+  <div class="game">
+    <div class="question" id="question"></div>
+    <div class="choices">
+      <button id="btnA" class="choice left" onclick="choose(0)"></button>
+      <button id="btnB" class="choice right" onclick="choose(1)"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAUSE ===== -->
+<div id="pause" class="screen">
+  <h2>หยุดเกม</h2>
+  <br>
+  <button class="primary" onclick="resumeGame()">เล่นต่อ</button>
+  <br><br>
+  <button onclick="backMenu()">กลับหน้าแรก</button>
+</div>
+
+<!-- ===== GAME OVER ===== -->
+<div id="over" class="screen">
+  <div class="big">GAME OVER</div>
+  <p>คะแนน: <span id="final"></span></p>
+  <br>
+  <button class="primary" onclick="backMenu()">กลับหน้าแรก</button>
+</div>
+
+<script>
+let score=0, heart=3, time=10;
+let timer=null, paused=false, correctIndex=0, countdownTimer=null;
+
+const $ = id => document.getElementById(id);
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  $(id).classList.add("active");
+}
+
+/* START */
+function startGame(){
+  score=0;
+  heart=3;
+  paused=false;
+  updateUI();
+  startCountdown();
+}
+
+/* COUNTDOWN */
+function startCountdown(){
+  show("countdown");
+  let n=3;
+  $("countNum").textContent=n;
+  countdownTimer=setInterval(()=>{
+    n--;
+    if(n<=0){
+      clearInterval(countdownTimer);
+      beginGame();
+    }else{
+      $("countNum").textContent=n;
+    }
+  },1000);
+}
+function skipCountdown(){
+  clearInterval(countdownTimer);
+  beginGame();
+}
+function beginGame(){
+  show("game");
+  nextQuestion();
+}
+
+/* GAME LOGIC (บวก ลบ คูณ หาร) */
+function nextQuestion(){
+  clearInterval(timer);
+  time=10;
+  $("time").textContent=time;
+
+  const ops=["+","-","×","÷"];
+  const op=ops[Math.floor(Math.random()*ops.length)];
+
+  let a,b,ans;
+
+  if(op==="+"){
+    a=Math.floor(Math.random()*20)+1;
+    b=Math.floor(Math.random()*20)+1;
+    ans=a+b;
+  }
+
+  if(op==="−" || op==="-" ){
+    a=Math.floor(Math.random()*20)+1;
+    b=Math.floor(Math.random()*a)+1;
+    ans=a-b;
+  }
+
+  if(op==="×"){
+    a=Math.floor(Math.random()*9)+1;
+    b=Math.floor(Math.random()*9)+1;
+    ans=a*b;
+  }
+
+  if(op==="÷"){
+    b=Math.floor(Math.random()*9)+1;
+    ans=Math.floor(Math.random()*9)+1;
+    a=b*ans;
+  }
+
+  $("question").textContent=`${a} ${op} ${b}`;
+
+  let wrong;
+  do{
+    wrong = ans + (Math.floor(Math.random()*7)-3);
+  }while(wrong===ans || wrong<0);
+
+  correctIndex=Math.random()<0.5?0:1;
+  $("btnA").textContent=correctIndex===0?ans:wrong;
+  $("btnB").textContent=correctIndex===1?ans:wrong;
+
+  timer=setInterval(()=>{
+    if(!paused){
+      time--;
+      $("time").textContent=time;
+      if(time<=0) fail();
+    }
+  },1000);
+}
+
+function choose(i){
+  if(paused) return;
+  if(i===correctIndex){
+    score++;
+    updateUI();
+    nextQuestion();
+  }else{
+    fail();
+  }
+}
+
+function fail(){
+  clearInterval(timer);
+  heart--;
+  updateUI();
+  if(heart<=0) endGame();
+  else nextQuestion();
+}
+
+/* UI */
+function updateUI(){
+  $("heart").textContent=heart;
+  $("score").textContent=score;
+}
+
+/* PAUSE */
+function pauseGame(){
+  paused=true;
+  clearInterval(timer);
+  show("pause");
+}
+function resumeGame(){
+  paused=false;
+  show("game");
+  nextQuestion();
+}
+
+
+/* END */
+function endGame(){
+  clearInterval(timer);
+  $("final").textContent=score;
+  show("over");
+}
+function backMenu(){
+  clearInterval(timer);
+  paused=false;
+  show("menu");
+}
+</script>
+</body>
+</html>
