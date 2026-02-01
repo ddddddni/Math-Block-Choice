@@ -12,71 +12,82 @@ body{
   background:#f9fafb;
   height:100vh;
   overflow:hidden;
+  transition:background .3s;
   user-select: none; -webkit-user-select: none;
 }
-
-/* --- Intro Overlay --- */
 #intro-overlay {
-  position: fixed; inset: 0; background-color: rgba(255, 255, 255, 0.95);
-  z-index: 9999; display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0;
+  background-color: rgba(255, 255, 255, 0.85);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer;
+  opacity: 1; transition: opacity 0.6s ease-out, visibility 0.6s;
 }
 #intro-overlay p {
-  font-size: 24px; font-weight: bold; color: #374151;
-  padding: 20px 40px; background: white; border-radius: 50px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: pulse 2s infinite;
+  font-size: 28px; font-weight: bold; color: #374151;
+  padding: 20px 30px; background: rgba(255,255,255,0.9);
+  border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  animation: pulseText 2s infinite;
 }
-@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+@keyframes pulseText { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 #intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-
-.screen{ display:none; height:100vh; width:100%; flex-direction:column; align-items:center; justify-content:center; }
-.active{ display:flex; }
-
-/* --- Menu UI --- */
+.screen{ display:none; height:100vh; width:100%; }
+.menu-screen.active { display: flex; }
+.active{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
+button{ border:none; cursor:pointer; }
+button.primary{
+  background:#2563eb; color:white; font-size:20px;
+  padding:16px 44px; border-radius:20px;
+  transition: transform 0.1s, background 0.2s;
+}
+button.primary:active { transform: scale(0.95); background: #1d4ed8; }
+.big{font-size:64px;font-weight:800}
 .menu-screen{ position:relative; background:#ffffff; overflow:hidden; }
 .math-bg{ position:absolute; inset:0; pointer-events:none; }
 .math-bg span{
   position:absolute; font-size:90px; font-weight:900;
-  color:#f3f4f6; opacity:0.8; animation:float 6s ease-in-out infinite;
+  color:#e5e7eb; opacity:0.9; animation:float 6s ease-in-out infinite;
 }
-.math-bg span:nth-child(1){top:10%;left:10%}
-.math-bg span:nth-child(2){top:20%;right:15%}
-.math-bg span:nth-child(3){bottom:20%;left:12%}
-.math-bg span:nth-child(4){bottom:15%;right:10%}
-@keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
-
+.math-bg span:nth-child(1){top:8%;left:12%}
+.math-bg span:nth-child(2){top:22%;right:10%}
+.math-bg span:nth-child(3){bottom:25%;left:8%}
+.math-bg span:nth-child(4){bottom:18%;right:16%}
+.math-bg span:nth-child(5){top:55%;left:45%}
+.math-bg span:nth-child(6){top:70%;right:35%}
+@keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
 .menu-content{ position:relative; z-index:2; text-align:center; padding:20px; }
-.logo{ font-size:60px; font-weight:900; line-height:1; margin-bottom:10px; color:#111827; }
-.subtitle{ color:#6b7280; margin-bottom:25px; font-size: 18px; letter-spacing: 1px; }
-.highscore-box { background: #f3f4f6; padding: 10px 20px; border-radius: 15px; margin-bottom: 35px; display: inline-block; font-weight: 600; color: #4b5563; }
-
-button.primary{
-  background:#2563eb; color:white; font-size:22px; font-weight:bold; padding:18px 50px;
-  border-radius:24px; border:none; cursor:pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.4);
+.logo{ font-size:56px; font-weight:900; line-height:1.1; margin-bottom:14px; }
+.subtitle{ color:#6b7280; margin-bottom:20px; }
+.highscore-box {
+  background: #f3f4f6; padding: 8px 16px; border-radius: 12px;
+  display: inline-block; margin-bottom: 30px; font-weight: 600; color: #4b5563;
 }
-
-/* --- Game UI --- */
 .hud{
-  position:fixed; top:0; width:100%; padding:15px 20px;
+  position:fixed; top:0;left:0; width:100%; padding:10px 14px;
   display:flex; justify-content:space-between; align-items:center;
-  background:#ffffffcc; backdrop-filter:blur(8px); z-index:10; border-bottom:1px solid #eee;
+  background:#ffffffcc; backdrop-filter:blur(6px); z-index:10;
 }
-.game{ padding-top:80px; text-align:center; width: 100%; max-width: 420px; }
-.question{ font-size:38px; font-weight:bold; margin:40px 0; min-height: 100px; display: flex; align-items: center; justify-content: center; color: #1f2937; }
-.choices{ display:grid; grid-template-columns:repeat(2, 160px); gap:20px; justify-content:center; }
+.hud-left{font-size:14px} .hud-center{font-size:18px;font-weight:700}
+.hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; }
+.game{ padding-top:70px; width:100%; max-width:420px; text-align:center; }
+
+/* Bonus Mode Styles */
+.game.gold-mode .question { color: #d97706; text-shadow: 0 0 10px #fde68a; font-weight: 900; }
+.game.gold-mode .choice { background: #d97706 !important; box-shadow: 0 4px #92400e; }
+.bonus-label { color: #d97706; font-weight: bold; display: none; margin-bottom: 5px; animation: pulseText 1s infinite; }
+
+.question{ font-size:36px; margin:30px 0; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+.choices{ display:grid; grid-template-columns:repeat(2,140px); gap:20px; justify-content:center; }
 .choice{
-  width:160px; height:90px; font-size:32px; font-weight:bold; color:white; border:none;
-  border-radius:20px; background:#2563eb; transition: 0.2s; box-shadow: 0 4px 0 #1d4ed8;
+  width:140px; height:80px; font-size:28px; color:white;
+  border-radius:16px; transition:background 0.2s, transform 0.1s; background:#2563eb;
 }
-
-.gold-mode .question { color: #d97706; text-shadow: 0 2px 10px rgba(251,191,36,0.3); }
-.gold-mode .choice { background: #d97706 !important; box-shadow: 0 4px 0 #b45309; }
-.bonus-label { color: #d97706; font-weight: 800; display: none; margin-bottom: 15px; font-size: 20px; }
-
-.success-pop { animation: successPop 0.4s forwards; background: #22c55e !important; box-shadow: 0 4px 0 #15803d !important; }
-@keyframes successPop { 0% {transform:scale(1)} 50% {transform:scale(1.1)} 100% {transform:scale(1)} }
-.error-shake { animation: errorShake 0.4s; background: #ef4444 !important; box-shadow: 0 4px 0 #b91c1c !important; }
-@keyframes errorShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+.success-pop { animation: successPop 0.4s ease-out; background-color: #22c55e !important; }
+@keyframes successPop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+.error-shake { animation: errorShake 0.4s; background-color: #ef4444 !important; }
+@keyframes errorShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); } }
+.score-info { font-size: 20px; margin: 10px 0 30px; color: #374151; }
+.new-record { color: #ea580c; font-weight: bold; display: none; }
 </style>
 </head>
 <body>
@@ -86,7 +97,7 @@ button.primary{
 </div>
 
 <div id="menu" class="screen active menu-screen">
-  <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span></div>
+  <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span></div>
   <div class="menu-content">
     <h1 class="logo">Math<br>Block<br>Choice</h1>
     <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
@@ -96,19 +107,18 @@ button.primary{
 </div>
 
 <div id="countdown" class="screen">
-  <div id="countNum" style="font-size:120px; font-weight:900; color:#2563eb;">3</div>
-  <p style="font-size:20px; color:#6b7280; margin-bottom:30px;">เตรียมพร้อม...</p>
+  <div class="big" id="countNum">3</div><p>เตรียมพร้อม</p><br>
   <button class="primary" onclick="skipCountdown()">ข้าม</button>
 </div>
 
 <div id="game" class="screen">
   <div class="hud">
-    <div style="font-size:20px;">❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span></div>
-    <div style="font-weight:900; font-size:22px;">⏱ <span id="time">10</span></div>
-    <button onclick="pauseGame()" style="padding:8px 15px; border-radius:12px; border:none; background:#e5e7eb; font-weight:bold;">หยุด</button>
+    <div class="hud-left">❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span></div>
+    <div class="hud-center">⏱ <span id="time">10</span></div>
+    <div class="hud-right"><button onclick="pauseGame()">หยุด</button></div>
   </div>
-  <div class="game" id="gameArea">
-    <div id="bonusLabel" class="bonus-label">✨ BONUS: +1 HEART ✨</div>
+  <div class="game" id="gameContainer">
+    <div id="bonusLabel" class="bonus-label">✨ BONUS: รับหัวใจคืน! ✨</div>
     <div class="question" id="question"></div>
     <div class="choices">
       <button id="btn0" class="choice" onclick="choose(0)"></button>
@@ -119,197 +129,274 @@ button.primary{
   </div>
 </div>
 
+<div id="pause" class="screen">
+  <h2>หยุดเกม</h2><br>
+  <button class="primary" onclick="resumeGame()">เล่นต่อ</button><br><br>
+  <button onclick="backMenu()">กลับหน้าแรก</button>
+</div>
+
+<div id="over" class="screen">
+  <div class="big">GAME OVER</div>
+  <div class="score-info">
+    <p>คะแนนของคุณ: <span id="final" style="font-weight:bold; font-size:28px;">0</span></p>
+    <p style="font-size:16px; color:#6b7280; margin-top:5px;">🏆 สถิติสูงสุด: <span id="bestScore">0</span></p>
+    <p id="newRecordMsg" class="new-record">🎉 ยินดีด้วย! สถิติใหม่ 🎉</p>
+  </div>
+  <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
+  <button onclick="backMenu()">กลับหน้าแรก</button>
+</div>
+
 <script>
-// จัดการตัวแปรพื้นฐาน
-let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0;
-let isBonus=false, bonusCooldown=false, lastQuestionText="", countdownTimer=null;
+let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
+let isBonus=false, bonusCooldown=false, lastQuestionText="";
 let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
 const $ = id => document.getElementById(id);
 $("menuHighScore").textContent = highScore;
 
-// --- ระบบเสียง (ซ่อมแซมใหม่ทั้งหมด) ---
 let audioCtx = null;
 let soundBuffers = {};
-let bgSource = null;
+let bgSources = { menu: null, game: null, bonus: null };
 
-async function handleTapStart() {
-    // สร้าง context เมื่อมีการคลิก (Browser Policy)
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') await audioCtx.resume();
-
-    const snds = [
-        ['menu','sound/bg_menu.mp3'],['game','sound/bg_game.mp3'],['bonus','sound/bonus.mp3'],
-        ['click','sound/click.mp3'],['correct','sound/correct.mp3'],['wrong','sound/wrong.mp3'],['over','sound/gameover.mp3']
-    ];
-
-    // โหลดไฟล์เสียงทีละตัวแบบ Safe load
-    for (const [name, url] of snds) {
-        try {
-            const resp = await fetch(url);
-            const arrayBuffer = await resp.arrayBuffer();
-            soundBuffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
-        } catch(e) { console.warn("Failed to load sound:", name); }
-    }
-
-    $("intro-overlay").classList.add("hidden");
-    playSFX('click');
-    playBGM('menu');
+async function loadSound(name, url) {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  soundBuffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
 }
 
 function playSFX(name) {
-    if (!audioCtx || !soundBuffers[name]) return;
+  if (!audioCtx || !soundBuffers[name]) return;
+  const source = audioCtx.createBufferSource();
+  source.buffer = soundBuffers[name];
+  source.connect(audioCtx.destination);
+  source.start(0);
+}
+
+function playBGM(type) {
+  stopAllBGM();
+  if (!audioCtx || !soundBuffers[type]) return;
+  const source = audioCtx.createBufferSource();
+  source.buffer = soundBuffers[type];
+  source.loop = true;
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.value = 0.4;
+  source.connect(gainNode).connect(audioCtx.destination);
+  source.start(0);
+  bgSources[type] = { source, gainNode, startTime: audioCtx.currentTime, pausedAt: 0 };
+}
+
+function stopAllBGM() {
+  for (let key in bgSources) {
+    if (bgSources[key]) {
+      try { bgSources[key].source.stop(); } catch(e) {}
+      bgSources[key] = null;
+    }
+  }
+}
+
+function pauseBGM() {
+  let type = isBonus ? 'bonus' : 'game';
+  if (bgSources[type]) {
+    bgSources[type].pausedAt = audioCtx.currentTime - bgSources[type].startTime;
+    try { bgSources[type].source.stop(); } catch(e) {}
+  }
+}
+
+function resumeBGM() {
+  let type = isBonus ? 'bonus' : 'game';
+  if (bgSources[type]) {
+    const prevOffset = bgSources[type].pausedAt;
     const source = audioCtx.createBufferSource();
-    source.buffer = soundBuffers[name];
-    source.connect(audioCtx.destination);
-    source.start(0);
-}
-
-function playBGM(name) {
-    // หยุดเพลงเก่าก่อนเล่นเพลงใหม่ (Singleton pattern)
-    if (bgSource) { try { bgSource.stop(); } catch(e){} bgSource = null; }
-    if (!audioCtx || !soundBuffers[name]) return;
-    
-    bgSource = audioCtx.createBufferSource();
-    bgSource.buffer = soundBuffers[name];
-    bgSource.loop = true;
+    source.buffer = soundBuffers[type];
+    source.loop = true;
     const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.3; // ปรับระดับเสียง
-    bgSource.connect(gainNode).connect(audioCtx.destination);
-    bgSource.start(0);
+    gainNode.gain.value = 0.4;
+    source.connect(gainNode).connect(audioCtx.destination);
+    source.start(0, prevOffset % soundBuffers[type].duration);
+    bgSources[type] = { source, gainNode, startTime: audioCtx.currentTime - prevOffset, pausedAt: 0 };
+  }
 }
 
-// --- ฟังก์ชันนำทาง (ห้ามเปลี่ยนชื่อหรือลบ) ---
+async function handleTapStart() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+  
+  const sounds = [
+    ['menu', 'sound/bg_menu.mp3'], ['game', 'sound/bg_game.mp3'],
+    ['bonus', 'sound/bonus.mp3'], // เพิ่มเสียงโบนัสถ้ามี
+    ['click', 'sound/click.mp3'], ['correct', 'sound/correct.mp3'],
+    ['wrong', 'sound/wrong.mp3'], ['over', 'sound/gameover.mp3']
+  ];
+
+  await Promise.all(sounds.map(s => loadSound(s[0], s[1]).catch(()=>console.log("No sound file: "+s[1]))));
+  $("intro-overlay").classList.add("hidden");
+  playSFX('click');
+  playBGM('menu');
+}
+
 function showScreen(id){
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    $(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+function updateHighScore() {
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('mathBlockHighScore', highScore);
+    return true;
+  }
+  return false;
 }
 
 function startGame(){
-    playSFX('click');
-    score=0; heart=3; isBonus=false; bonusCooldown=false; lastQuestionText="";
-    $("score").textContent=score; $("heart").textContent=heart;
-    showScreen('countdown');
-    let c=3; $("countNum").textContent=c;
-    if(countdownTimer) clearInterval(countdownTimer);
-    countdownTimer = setInterval(() => {
-        c--;
-        if(c>0) { $("countNum").textContent=c; playSFX('click'); }
-        else { clearInterval(countdownTimer); showGame(); }
-    }, 1000);
+  playSFX('click');
+  stopAllBGM();
+  score=0; heart=3; isBonus=false; bonusCooldown=false;
+  $("score").textContent=score; $("heart").textContent=heart;
+  startCountdown();
+}
+
+function startCountdown(){
+  showScreen('countdown');
+  let c=3; $("countNum").textContent=c; playSFX('click');
+  clearInterval(countdownTimer);
+  countdownTimer=setInterval(()=>{
+    c--;
+    if(c>0) { $("countNum").textContent=c; playSFX('click'); }
+    else { clearInterval(countdownTimer); showGame(); }
+  },1000);
 }
 
 function skipCountdown(){ playSFX('click'); clearInterval(countdownTimer); showGame(); }
 
-function showGame(){ 
-    paused=false; 
-    playBGM('game');
-    showScreen('game'); 
-    nextQuestion(); 
+function showGame(){
+  paused=false;
+  showScreen('game'); 
+  playBGM('game'); 
+  nextQuestion();
 }
 
-// --- Logic การสร้างโจทย์ (มีวงเล็บ + - * / ตามโจทย์) ---
-function calc(a, op, b) {
-    if (op === "+") return a + b;
-    if (op === "-") return a - b;
-    if (op === "×") return a * b;
-    if (op === "÷") return a / b;
-    return 0;
+function pauseGame(){ playSFX('click'); paused=true; pauseBGM(); showScreen('pause'); }
+
+function resumeGame(){ 
+  playSFX('click'); paused=false; resumeBGM(); showScreen('game'); 
+}
+
+function backMenu(){ 
+  playSFX('click'); clearInterval(timer);
+  updateHighScore();
+  stopAllBGM(); playBGM('menu');
+  $("menuHighScore").textContent = highScore;
+  showScreen('menu'); 
+}
+
+// Logic คำนวณ
+function calculate(a, op, b) {
+  if (op === "+") return a + b;
+  if (op === "-") return a - b;
+  if (op === "×") return a * b;
+  if (op === "÷") return a / b;
+  return 0;
 }
 
 function nextQuestion(){
-    clearInterval(timer);
-    time=10; $("time").textContent=time;
-    for(let i=0; i<4; i++) $("btn"+i).className = 'choice';
+  clearInterval(timer);
+  time=10; $("time").textContent=time;
+  for(let i=0; i<4; i++) $("btn"+i).className = 'choice';
 
-    // โบนัส 10% และไม่ติดกัน
-    if (heart < 3 && !bonusCooldown && Math.random() < 0.1) {
-        isBonus = true; bonusCooldown = true;
-        playBGM('bonus');
+  // สุ่มโหมดโบนัส 10% และไม่ติดกัน
+  if (heart < 3 && !bonusCooldown && Math.random() < 0.1) {
+    isBonus = true; bonusCooldown = true;
+    if(soundBuffers['bonus']) playBGM('bonus');
+  } else {
+    if(isBonus) playBGM('game');
+    isBonus = false; bonusCooldown = false;
+  }
+
+  $("gameContainer").className = isBonus ? "game gold-mode" : "game";
+  $("bonusLabel").style.display = isBonus ? "block" : "none";
+
+  let expr = "", ans = 0;
+  
+  do {
+    // ระดับความยากตามคะแนน
+    let level = isBonus ? 4 : (score >= 300 ? 4 : (score >= 150 ? 3 : 2));
+    
+    if (level === 2) {
+      const ops=["+","-","×","÷"];
+      const op=ops[Math.floor(Math.random()*ops.length)];
+      let a, b;
+      if(op==="+"){ a=Math.floor(Math.random()*30)+1; b=Math.floor(Math.random()*30)+1; ans=a+b; }
+      else if(op==="-"){ a=Math.floor(Math.random()*30)+10; b=Math.floor(Math.random()*15)+1; ans=a-b; }
+      else if(op==="×"){ a=Math.floor(Math.random()*12)+1; b=Math.floor(Math.random()*9)+1; ans=a*b; }
+      else { b=Math.floor(Math.random()*9)+1; ans=Math.floor(Math.random()*9)+1; a=b*ans; }
+      expr = `${a} ${op} ${b}`;
+    } else if (level === 3) {
+      let a=Math.floor(Math.random()*15)+1, b=Math.floor(Math.random()*10)+1, c=Math.floor(Math.random()*10)+1;
+      let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)];
+      if (Math.random() > 0.5) {
+        ans = calculate(calculate(a, op1, b), op2, c);
+        expr = `(${a} ${op1} ${b}) ${op2} ${c}`;
+      } else {
+        ans = calculate(a, op2, calculate(b, op1, c));
+        expr = `${a} ${op2} (${b} ${op1} ${c})`;
+      }
     } else {
-        if(isBonus) playBGM('game');
-        isBonus = false; bonusCooldown = false;
+      let a=Math.floor(Math.random()*10)+2, b=Math.floor(Math.random()*10)+2, c=Math.floor(Math.random()*10)+1, d=Math.floor(Math.random()*10)+1;
+      let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)], op3=["+","-"][Math.floor(Math.random()*2)];
+      ans = calculate(calculate(a, op1, b), op2, calculate(c, op3, d));
+      expr = `(${a} ${op1} ${b}) ${op2} (${c} ${op3} ${d})`;
     }
+  } while (ans < 0 || ans > 500 || expr === lastQuestionText);
 
-    $("gameArea").className = isBonus ? "game gold-mode" : "game";
-    $("bonusLabel").style.display = isBonus ? "block" : "none";
+  lastQuestionText = expr;
+  $("question").textContent = expr + " = ?";
 
-    let expr = "", ans = 0;
-    do {
-        // เลือกระดับความยากตามคะแนน หรือโหมดโบนัส
-        let n = isBonus ? 4 : (score > 300 ? 3 : (score > 100 && Math.random() < 0.6 ? 3 : 2));
-        
-        if (n === 2) {
-            const op = ["+","-","×","÷"][Math.floor(Math.random()*4)];
-            let a, b;
-            if(op==="+"){ a=rand(1,25); b=rand(1,25); ans=a+b; }
-            else if(op==="-"){ a=rand(15,35); b=rand(1,15); ans=a-b; }
-            else if(op==="×"){ a=rand(2,10); b=rand(2,10); ans=a*b; }
-            else { b=rand(2,10); ans=rand(2,10); a=b*ans; }
-            expr = `${a} ${op} ${b}`;
-        } else if (n === 3) {
-            let a=rand(2,12), b=rand(2,12), c=rand(2,10);
-            let op1=["+","-","×"][rand(0,2)], op2=["+","-"][rand(0,1)];
-            if(Math.random()>0.5){ ans=calc(calc(a,op1,b),op2,c); expr=`(${a} ${op1} ${b}) ${op2} ${c}`; }
-            else { ans=calc(a,op2,calc(b,op1,c)); expr=`${a} ${op2} (${b} ${op1} ${c})`; }
-        } else {
-            let a=rand(2,10), b=rand(2,10), c=rand(2,8), d=rand(2,8);
-            let op1=["+","-","×"][rand(0,2)], op2=["+","-"][rand(0,1)], op3=["+","-"][rand(0,1)];
-            ans = calc(calc(a,op1,b), op2, calc(c,op3,d));
-            expr = `(${a} ${op1} ${b}) ${op2} (${c} ${op3} ${d})`;
-        }
-    } while (expr === lastQuestionText || ans < 0 || ans > 300);
+  let answers=[ans];
+  while(answers.length<4){
+    let w=ans+(Math.floor(Math.random()*21)-10);
+    if(w>=0 && !answers.includes(w)) answers.push(w);
+  }
+  answers.sort(()=>Math.random()-0.5);
+  correctIndex=answers.indexOf(ans);
+  for(let i=0; i<4; i++) $("btn"+i).textContent=answers[i];
 
-    lastQuestionText = expr;
-    $("question").textContent = expr + " = ?";
-
-    let choices = [ans];
-    while(choices.length < 4) {
-        let w = ans + rand(-10, 10);
-        if(w >= 0 && !choices.includes(w)) choices.push(w);
+  timer=setInterval(()=>{
+    if(!paused){
+      time--; $("time").textContent=time;
+      if(time<=0) { playSFX('wrong'); fail(null); }
     }
-    choices.sort(() => Math.random() - 0.5);
-    correctIndex = choices.indexOf(ans);
-    for(let i=0; i<4; i++) $("btn"+i).textContent = choices[i];
-
-    timer = setInterval(() => {
-        if(!paused) {
-            time--; $("time").textContent = time;
-            if(time <= 0) fail(null);
-        }
-    }, 1000);
+  },1000);
 }
 
-function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
 function choose(idx){
-    if(paused) return;
-    if(idx === correctIndex){
-        playSFX('correct');
-        $("btn"+idx).classList.add('success-pop');
-        score += 10;
-        if(isBonus) heart = Math.min(3, heart + 1);
-        $("score").textContent = score; $("heart").textContent = heart;
-        setTimeout(nextQuestion, 400);
-    } else {
-        playSFX('wrong');
-        $("btn"+idx).classList.add('error-shake');
-        fail(idx);
-    }
+  if(paused) return;
+  if(idx===correctIndex){
+    playSFX('correct');
+    $("btn"+idx).classList.add('success-pop');
+    score+=10; $("score").textContent=score;
+    if(isBonus) { heart = Math.min(3, heart + 1); $("heart").textContent=heart; }
+    setTimeout(nextQuestion, 400);
+  } else {
+    playSFX('wrong');
+    $("btn"+idx).classList.add('error-shake');
+    fail(idx);
+  }
 }
 
 function fail(idx){
-    if(!isBonus) { heart--; $("heart").textContent = heart; }
-    if(heart <= 0) setTimeout(gameOver, 400);
-    else setTimeout(nextQuestion, 400);
+  if(!isBonus) heart--; 
+  $("heart").textContent=heart;
+  if(heart<=0) { setTimeout(gameOver, 400); }
+  else { if(idx !== null) setTimeout(nextQuestion, 400); else nextQuestion(); }
 }
 
 function gameOver(){
-    clearInterval(timer); playBGM('over');
-    $("final").textContent = score;
-    if (score > highScore) {
-        highScore = score; localStorage.setItem('mathBlockHighScore', highScore);
-    }
-    showScreen('over');
+  clearInterval(timer); stopAllBGM(); playSFX('over');
+  $("final").textContent=score;
+  const isNew = updateHighScore();
+  $("bestScore").textContent = highScore;
+  $("newRecordMsg").style.display = isNew ? "block" : "none";
+  showScreen('over');
 }
 </script>
 </body>
