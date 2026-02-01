@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Math Block Choice</title>
 <style>
-button { touch-action: manipulation; }
+/* ป้องกันการ double-tap zoom และ highlight สีฟ้า */
+button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family:system-ui,sans-serif;
+  font-family:system-ui, -apple-system, sans-serif;
   background:#f9fafb;
   height:100vh;
-  overflow:hidden;
+  overflow:hidden; /* ป้องกัน scrollbar */
   transition:background .3s;
   user-select: none; -webkit-user-select: none;
 }
@@ -28,13 +29,14 @@ body{
   padding: 20px 30px; background: rgba(255,255,255,0.9);
   border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   animation: pulseText 2s infinite;
+  pointer-events: none;
 }
 @keyframes pulseText { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 #intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 .screen{ display:none; height:100vh; width:100%; }
 .menu-screen.active { display: flex; }
 .active{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
-button{ border:none; cursor:pointer; position: relative; }
+button{ border:none; cursor:pointer; position: relative; font-family: inherit; }
 button.primary{
   background:#2563eb; color:white; font-size:20px;
   padding:16px 44px; border-radius:20px;
@@ -70,31 +72,63 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 }
 .hud-left{font-size:14px} .hud-center{font-size:18px;font-weight:700}
 .hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; transition: transform 0.2s; }
-.game{ padding-top:70px; width:100%; max-width:420px; text-align:center; }
+
+/* Game Layout ปรับให้ยืดหยุ่น */
+.game{ 
+  padding-top:60px; width:100%; max-width:420px; 
+  text-align:center; display: flex; flex-direction: column; justify-content: center;
+  height: 100%; /* ให้เต็มความสูง */
+}
 
 /* Bonus Mode Styles */
 .game.gold-mode .question { color: #d97706; text-shadow: 0 0 10px #fde68a; font-weight: 900; }
 .game.gold-mode .choice { background: #d97706 !important; box-shadow: 0 4px #92400e; }
 .bonus-label { color: #d97706; font-weight: bold; display: none; margin-bottom: 5px; animation: pulseText 1s infinite; }
 
-.question{ font-size:36px; margin:30px 0; min-height: 80px; display: flex; align-items: center; justify-content: center; }
-.choices{ display:grid; grid-template-columns:repeat(2,140px); gap:20px; justify-content:center; }
+.question{ font-size:36px; margin:20px 0; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+.choices{ display:grid; grid-template-columns:repeat(2,1fr); gap:15px; padding: 0 10px; justify-content:center; }
 .choice{
-  width:140px; height:80px; font-size:28px; color:white;
+  width:100%; height:80px; font-size:28px; color:white;
   border-radius:16px; 
   background:#2563eb; position: relative;
-  /* Transition สำหรับตอนปล่อยเมาส์ให้กลับที่เดิม */
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, background 0.2s;
   will-change: transform;
 }
 
-/* Fallback Hover Effect & Shadow */
 .choice:hover, .primary:hover { 
   box-shadow: 0 12px 20px rgba(37,99,235,0.35);
   z-index: 10;
 }
 .gold-mode .choice:hover { 
   box-shadow: 0 12px 20px rgba(217,119,6,0.45); 
+}
+
+/* --- Responsive สำหรับจอใหญ่ (iPad/Desktop) --- */
+@media (min-width: 768px) and (min-height: 600px) {
+  .logo { font-size: 80px; margin-bottom: 20px; }
+  .subtitle { font-size: 24px; }
+  .highscore-box { font-size: 20px; padding: 12px 24px; }
+  button.primary { font-size: 28px; padding: 20px 60px; border-radius: 28px; }
+
+  /* ขยายกล่องเกมให้ใหญ่ขึ้นแต่ไม่ล้น */
+  .game { max-width: 700px; padding-top: 80px; }
+  
+  /* ขยาย HUD */
+  .hud { padding: 20px 30px; }
+  .hud-left { font-size: 24px; }
+  .hud-center { font-size: 32px; }
+  .hud-right button { font-size: 20px; padding: 10px 20px; }
+
+  /* ขยายโจทย์และปุ่ม */
+  .question { font-size: 72px; margin: 30px 0 50px; }
+  .choices { gap: 30px; }
+  .choice { 
+    height: 140px; /* เพิ่มความสูงปุ่มให้กดง่าย */
+    font-size: 56px; /* ตัวเลขใหญ่ชัด */
+    border-radius: 24px; 
+    box-shadow: 0 6px #1e40af;
+  }
+  .bonus-label { font-size: 24px; margin-bottom: 20px; }
 }
 
 .success-pop { animation: successPop 0.4s ease-out; background-color: #22c55e !important; pointer-events: none; }
@@ -107,7 +141,7 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 </head>
 <body>
 
-<div id="intro-overlay" onclick="handleTapStart()">
+<div id="intro-overlay" onclick="handleTapStart(event)" ontouchend="handleTapStart(event)">
   <p>แตะหน้าจอเพื่อเริ่มเกม</p>
 </div>
 
@@ -166,6 +200,7 @@ let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdo
 let isBonus=false, bonusCooldown=false, lastQuestionText="";
 let inputLocked = false;
 let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
+let audioInited = false;
 const $ = id => document.getElementById(id);
 $("menuHighScore").textContent = highScore;
 
@@ -174,9 +209,12 @@ let soundBuffers = {};
 let bgSources = { menu: null, game: null, bonus: null };
 
 async function loadSound(name, url) {
-  const response = await fetch(url);
-  const arrayBuffer = await response.arrayBuffer();
-  soundBuffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
+  try {
+    const response = await fetch(url);
+    if(!response.ok) throw new Error("File not found");
+    const arrayBuffer = await response.arrayBuffer();
+    soundBuffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
+  } catch(e) { console.log("Sound error:", name); }
 }
 
 function playSFX(name) {
@@ -232,10 +270,21 @@ function resumeBGM() {
   }
 }
 
-async function handleTapStart() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') await audioCtx.resume();
+// แก้ปัญหาแตะไม่ติดใน iPad/Mobile
+async function handleTapStart(e) {
+  if (e.type === 'touchend') e.preventDefault(); // ป้องกัน ghost click
+  if (audioInited) return;
   
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    await audioCtx.resume();
+  }
+
+  audioInited = true;
+  $("intro-overlay").classList.add("hidden");
+
   const sounds = [
     ['menu', 'sound/bg_menu.mp3'], ['game', 'sound/bg_game.mp3'],
     ['bonus', 'sound/bonus.mp3'], 
@@ -243,10 +292,11 @@ async function handleTapStart() {
     ['wrong', 'sound/wrong.mp3'], ['over', 'sound/gameover.mp3']
   ];
 
-  await Promise.all(sounds.map(s => loadSound(s[0], s[1]).catch(()=>console.log("No sound: "+s[1]))));
-  $("intro-overlay").classList.add("hidden");
-  playSFX('click');
-  playBGM('menu');
+  Promise.all(sounds.map(s => loadSound(s[0], s[1]))).then(() => {
+    playSFX('click');
+    playBGM('menu');
+  });
+
   initMagneticButtons();
 }
 
@@ -444,7 +494,7 @@ function gameOver(){
   showScreen('over');
 }
 
-// --- ฟังก์ชันสำหรับ Magnetic Effect (ปรับเป็น 0.1) ---
+// --- Magnetic Effect (0.1 & Scale 1.02) ---
 function initMagneticButtons() {
   const btns = document.querySelectorAll('button.choice, button.primary');
   
@@ -456,7 +506,6 @@ function initMagneticButtons() {
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
 
-      // ปรับความแรงเป็น 0.1 และลด Scale เล็กน้อยเพื่อให้ดูนุ่มนวล
       btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px) scale(1.02)`;
       btn.style.transition = 'transform 0.05s linear';
     });
