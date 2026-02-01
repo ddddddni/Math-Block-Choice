@@ -39,7 +39,7 @@ button.primary{
   background:#2563eb; color:white; font-size:20px;
   padding:16px 44px; border-radius:20px;
   transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s;
-  will-change: transform; /* เพิ่มประสิทธิภาพการขยับ */
+  will-change: transform;
 }
 button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; }
 .big{font-size:64px;font-weight:800}
@@ -83,12 +83,12 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   width:140px; height:80px; font-size:28px; color:white;
   border-radius:16px; 
   background:#2563eb; position: relative;
-  /* ใช้ transition สำหรับตอนปล่อยเมาส์ให้กลับที่เดิมนุ่มๆ */
+  /* Transition สำหรับตอนปล่อยเมาส์ให้กลับที่เดิม */
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, background 0.2s;
   will-change: transform;
 }
 
-/* Hover Effect แบบ CSS ปกติ (Fallback) และสำหรับเงา */
+/* Fallback Hover Effect & Shadow */
 .choice:hover, .primary:hover { 
   box-shadow: 0 12px 20px rgba(37,99,235,0.35);
   z-index: 10;
@@ -247,7 +247,7 @@ async function handleTapStart() {
   $("intro-overlay").classList.add("hidden");
   playSFX('click');
   playBGM('menu');
-  initMagneticButtons(); // เริ่มระบบปุ่มลอย
+  initMagneticButtons();
 }
 
 function showScreen(id){
@@ -321,7 +321,7 @@ function nextQuestion(){
   for(let i=0; i<4; i++) {
     let btn = $("btn"+i);
     btn.className = 'choice';
-    btn.style.transform = ""; // Reset transform
+    btn.style.transform = ""; 
   }
 
   if (heart < 3 && !bonusCooldown && Math.random() < 0.1) {
@@ -444,29 +444,27 @@ function gameOver(){
   showScreen('over');
 }
 
-// --- ฟังก์ชันสำหรับ Magnetic Effect ---
+// --- ฟังก์ชันสำหรับ Magnetic Effect (ปรับเป็น 0.1) ---
 function initMagneticButtons() {
   const btns = document.querySelectorAll('button.choice, button.primary');
   
   btns.forEach(btn => {
     btn.addEventListener('pointermove', function(e) {
-      // หยุดถ้าปุ่มมีอนิเมชั่นอื่นอยู่
       if(btn.classList.contains('success-pop') || btn.classList.contains('error-shake') || paused) return;
 
       const rect = btn.getBoundingClientRect();
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
 
-      // ปรับความแรงของแม่เหล็ก (0.2 คือความแรง) และ Scale
-      btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px) scale(1.05)`;
-      btn.style.transition = 'transform 0.05s linear'; // ขยับเร็วๆ ตามเมาส์
+      // ปรับความแรงเป็น 0.1 และลด Scale เล็กน้อยเพื่อให้ดูนุ่มนวล
+      btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px) scale(1.02)`;
+      btn.style.transition = 'transform 0.05s linear';
     });
 
     btn.addEventListener('pointerleave', function() {
-      // กลับที่เดิม
       if(btn.classList.contains('success-pop') || btn.classList.contains('error-shake')) return;
       btn.style.transform = ''; 
-      btn.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; // เด้งกลับนุ่มๆ
+      btn.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; 
     });
   });
 }
