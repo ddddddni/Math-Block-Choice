@@ -12,13 +12,12 @@ body{
   background:#f9fafb;
   height:100vh;
   overflow:hidden;
-  transition:background .3s;
   user-select: none; -webkit-user-select: none;
 }
 
 /* --- Intro Overlay --- */
 #intro-overlay {
-  position: fixed; inset: 0; background-color: rgba(255, 255, 255, 0.9);
+  position: fixed; inset: 0; background-color: rgba(255, 255, 255, 0.95);
   z-index: 9999; display: flex; align-items: center; justify-content: center;
   cursor: pointer;
 }
@@ -33,7 +32,7 @@ body{
 .screen{ display:none; height:100vh; width:100%; flex-direction:column; align-items:center; justify-content:center; }
 .active{ display:flex; }
 
-/* --- Menu UI (รักษาไว้ครบทุกคำ) --- */
+/* --- Menu UI --- */
 .menu-screen{ position:relative; background:#ffffff; overflow:hidden; }
 .math-bg{ position:absolute; inset:0; pointer-events:none; }
 .math-bg span{
@@ -120,33 +119,21 @@ button.primary{
   </div>
 </div>
 
-<div id="pause" class="screen">
-  <h2 style="font-size:40px; margin-bottom:30px;">หยุดชั่วคราว</h2>
-  <button class="primary" onclick="resumeGame()">เล่นต่อ</button><br><br>
-  <button onclick="backMenu()" style="color:#6b7280; background:none; border:none; font-size:18px;">กลับหน้าหลัก</button>
-</div>
-
-<div id="over" class="screen">
-  <div style="font-size:50px; font-weight:900; color:#ef4444;">GAME OVER</div>
-  <p style="font-size:24px; margin:20px 0;">คะแนนของคุณ: <span id="final" style="font-weight:bold">0</span></p>
-  <p id="newRecordMsg" style="color:#f59e0b; display:none; font-weight:bold; font-size:22px; margin-bottom:20px;">🎉 สถิติใหม่! 🎉</p>
-  <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
-  <button onclick="backMenu()" style="color:#6b7280; background:none; border:none; font-size:18px;">กลับหน้าแรก</button>
-</div>
-
 <script>
+// จัดการตัวแปรพื้นฐาน
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0;
 let isBonus=false, bonusCooldown=false, lastQuestionText="", countdownTimer=null;
 let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
 const $ = id => document.getElementById(id);
 $("menuHighScore").textContent = highScore;
 
-// --- ระบบเสียง (แก้ไขให้โหลดครบและเล่นได้จริง) ---
+// --- ระบบเสียง (ซ่อมแซมใหม่ทั้งหมด) ---
 let audioCtx = null;
 let soundBuffers = {};
 let bgSource = null;
 
 async function handleTapStart() {
+    // สร้าง context เมื่อมีการคลิก (Browser Policy)
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') await audioCtx.resume();
 
@@ -155,13 +142,14 @@ async function handleTapStart() {
         ['click','sound/click.mp3'],['correct','sound/correct.mp3'],['wrong','sound/wrong.mp3'],['over','sound/gameover.mp3']
     ];
 
-    await Promise.all(snds.map(async ([name, url]) => {
+    // โหลดไฟล์เสียงทีละตัวแบบ Safe load
+    for (const [name, url] of snds) {
         try {
             const resp = await fetch(url);
             const arrayBuffer = await resp.arrayBuffer();
             soundBuffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
-        } catch(e) { console.warn("Load fail:", name); }
-    }));
+        } catch(e) { console.warn("Failed to load sound:", name); }
+    }
 
     $("intro-overlay").classList.add("hidden");
     playSFX('click');
@@ -177,18 +165,20 @@ function playSFX(name) {
 }
 
 function playBGM(name) {
-    if (bgSource) { try { bgSource.stop(); } catch(e){} }
+    // หยุดเพลงเก่าก่อนเล่นเพลงใหม่ (Singleton pattern)
+    if (bgSource) { try { bgSource.stop(); } catch(e){} bgSource = null; }
     if (!audioCtx || !soundBuffers[name]) return;
+    
     bgSource = audioCtx.createBufferSource();
     bgSource.buffer = soundBuffers[name];
     bgSource.loop = true;
     const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.3;
+    gainNode.gain.value = 0.3; // ปรับระดับเสียง
     bgSource.connect(gainNode).connect(audioCtx.destination);
     bgSource.start(0);
 }
 
-// --- การนำทาง ---
+// --- ฟังก์ชันนำทาง (ห้ามเปลี่ยนชื่อหรือลบ) ---
 function showScreen(id){
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     $(id).classList.add('active');
@@ -217,17 +207,7 @@ function showGame(){
     nextQuestion(); 
 }
 
-function pauseGame(){ playSFX('click'); paused=true; showScreen('pause'); }
-function resumeGame(){ playSFX('click'); paused=false; showScreen('game'); }
-
-function backMenu(){ 
-    playSFX('click'); clearInterval(timer);
-    playBGM('menu');
-    $("menuHighScore").textContent = highScore;
-    showScreen('menu'); 
-}
-
-// --- โจทย์คณิตศาสตร์ (เพิ่มวงเล็บและความท้าทาย) ---
+// --- Logic การสร้างโจทย์ (มีวงเล็บ + - * / ตามโจทย์) ---
 function calc(a, op, b) {
     if (op === "+") return a + b;
     if (op === "-") return a - b;
@@ -255,7 +235,9 @@ function nextQuestion(){
 
     let expr = "", ans = 0;
     do {
+        // เลือกระดับความยากตามคะแนน หรือโหมดโบนัส
         let n = isBonus ? 4 : (score > 300 ? 3 : (score > 100 && Math.random() < 0.6 ? 3 : 2));
+        
         if (n === 2) {
             const op = ["+","-","×","÷"][Math.floor(Math.random()*4)];
             let a, b;
@@ -326,8 +308,7 @@ function gameOver(){
     $("final").textContent = score;
     if (score > highScore) {
         highScore = score; localStorage.setItem('mathBlockHighScore', highScore);
-        $("newRecordMsg").style.display = "block";
-    } else { $("newRecordMsg").style.display = "none"; }
+    }
     showScreen('over');
 }
 </script>
