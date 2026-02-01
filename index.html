@@ -8,36 +8,35 @@
 <meta name="apple-mobile-web-app-title" content="Math Block">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <link rel="apple-touch-icon" href="icon-512.png">
-
 <link rel="icon" type="image/png" href="icon-512.png">
+
 <style>
 /* ป้องกันการ double-tap zoom และ highlight สีฟ้า */
 button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family:system-ui, -apple-system, sans-serif;
-  background:#f9fafb;
-  height:100vh;
-  overflow:hidden; /* ป้องกัน scrollbar */
-  transition:background .3s;
-  user-select: none; -webkit-user-select: none;
+  font-family:system-ui, -apple-system, sans-serif;
+  background:#f9fafb;
+  height:100vh;
+  overflow:hidden; /* ป้องกัน scrollbar */
+  transition:background .3s;
+  user-select: none; -webkit-user-select: none;
 }
 #intro-overlay {
-  position: fixed; inset: 0;
-  background-color: rgba(255, 255, 255, 0.85);
-  z-index: 9999;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  opacity: 1; transition: opacity 0.6s ease-out, visibility 0.6s;
+  position: fixed; inset: 0;
+  background-color: rgba(255, 255, 255, 0.85);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  opacity: 1; transition: opacity 0.6s ease-out, visibility 0.6s;
 }
 #intro-overlay p {
-  font-size: 28px; font-weight: bold; color: #374151;
-  padding: 20px 30px; background: rgba(255,255,255,0.9);
-  border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  animation: pulseText 2s infinite;
-  pointer-events: none;
+  font-size: 28px; font-weight: bold; color: #374151;
+  padding: 20px 30px; background: rgba(255,255,255,0.9);
+  border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  animation: pulseText 2s infinite;
+  pointer-events: none;
 }
 @keyframes pulseText { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 #intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -46,19 +45,20 @@ body{
 .active{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
 button{ border:none; cursor:pointer; position: relative; font-family: inherit; }
 button.primary{
-  background:#2563eb; color:white; font-size:20px;
-  padding:16px 44px; border-radius:20px;
-  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s;
-  will-change: transform;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  background:#2563eb; color:white; font-size:20px;
+  padding:16px 44px; border-radius:20px;
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s;
+  will-change: transform;
+  /* ลบเงาหนาๆ ออก เหลือแค่เงาบางๆ */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; }
 .big{font-size:64px;font-weight:800}
 .menu-screen{ position:relative; background:#ffffff; overflow:hidden; }
 .math-bg{ position:absolute; inset:0; pointer-events:none; }
 .math-bg span{
-  position:absolute; font-size:90px; font-weight:900;
-  color:#e5e7eb; opacity:0.9; animation:float 6s ease-in-out infinite;
+  position:absolute; font-size:90px; font-weight:900;
+  color:#e5e7eb; opacity:0.9; animation:float 6s ease-in-out infinite;
 }
 .math-bg span:nth-child(1){top:8%;left:12%}
 .math-bg span:nth-child(2){top:22%;right:10%}
@@ -69,25 +69,38 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
 .menu-content{ position:relative; z-index:2; text-align:center; padding:20px; }
 .logo{ font-size:56px; font-weight:900; line-height:1.1; margin-bottom:14px; }
-.subtitle{ color:#6b7280; margin-bottom:20px; }
+.subtitle{ color:#6b7280; margin-bottom:10px; }
 .highscore-box {
-  background: #f3f4f6; padding: 8px 16px; border-radius: 12px;
-  display: inline-block; margin-bottom: 30px; font-weight: 600; color: #4b5563;
+  background: #f3f4f6; padding: 8px 16px; border-radius: 12px;
+  display: inline-block; margin-bottom: 10px; font-weight: 600; color: #4b5563;
 }
+.lastscore-box { font-size: 14px; color: #6b7280; margin-bottom: 20px; }
 .hud{
-  position:fixed; top:0;left:0; width:100%; padding:10px 14px;
-  display:flex; justify-content:space-between; align-items:center;
-  background:#ffffffcc; backdrop-filter:blur(6px); z-index:10;
+  position:fixed; top:0;left:0; width:100%; padding:10px 14px;
+  display:flex; justify-content:space-between; align-items:center;
+  background:#ffffffcc; backdrop-filter:blur(6px); z-index:10;
 }
 .hud-left{font-size:14px} .hud-center{font-size:18px;font-weight:700}
 .hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; transition: transform 0.2s; }
 
-.game{ 
-  padding-top:60px; width:100%; max-width:420px; 
-  text-align:center; display: flex; flex-direction: column; justify-content: center;
-  height: 100%;
+/* ปุ่มประวัติการเล่น */
+.history-btn { background: none; margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.history-btn img { width: 50px; height: 50px; object-fit: contain; }
+.history-btn span { font-size: 12px; color: #4b5563; font-weight: bold; }
+
+/* ตารางประวัติ */
+.history-container { width: 90%; max-width: 400px; background: white; border-radius: 20px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 15px; overflow-y: auto; max-height: 200px; }
+.history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+.history-item:last-child { border-bottom: none; }
+
+/* Game Layout ปรับให้ยืดหยุ่น */
+.game{ 
+  padding-top:60px; width:100%; max-width:420px; 
+  text-align:center; display: flex; flex-direction: column; justify-content: center;
+  height: 100%; /* ให้เต็มความสูง */
 }
 
+/* Bonus Mode Styles */
 .game.gold-mode .question { color: #d97706; text-shadow: 0 0 10px #fde68a; font-weight: 900; }
 .game.gold-mode .choice { background: #d97706 !important; }
 .bonus-label { color: #d97706; font-weight: bold; display: none; margin-bottom: 5px; animation: pulseText 1s infinite; }
@@ -96,35 +109,49 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 .choices{ display:grid; grid-template-columns:repeat(2,1fr); gap:15px; padding: 0 10px; justify-content:center; }
 
 .choice{
-  width:100%; height:80px; font-size:28px; color:white;
-  border-radius:16px; 
-  background:#2563eb; position: relative;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-  will-change: transform;
+  width:100%; height:80px; font-size:28px; color:white;
+  border-radius:16px; 
+  background:#2563eb; position: relative;
+  /* แก้ไข 1: ลบเงา 3D ด้านล่างออก เหลือแต่เงาบางๆ */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+  will-change: transform;
+  /* เอา Transition ออกจากตรงนี้ เพื่อจัดการใน JS แทนสำหรับความสมูท */
 }
 
-.choice:hover, .primary:hover { 
-  box-shadow: 0 8px 16px rgba(37,99,235,0.25);
-  z-index: 10;
+.choice:hover, .primary:hover { 
+  /* ปรับเงา Hover ให้ฟุ้งขึ้นแต่ไม่มีฐานหนา */
+  box-shadow: 0 8px 16px rgba(37,99,235,0.25);
+  z-index: 10;
 }
-.gold-mode .choice:hover { 
-  box-shadow: 0 8px 16px rgba(217,119,6,0.35); 
+.gold-mode .choice:hover { 
+  box-shadow: 0 8px 16px rgba(217,119,6,0.35); 
 }
 
+/* --- Responsive สำหรับจอใหญ่ (iPad/Desktop) --- */
 @media (min-width: 768px) and (min-height: 600px) {
-  .logo { font-size: 80px; margin-bottom: 20px; }
-  .subtitle { font-size: 24px; }
-  .highscore-box { font-size: 20px; padding: 12px 24px; }
-  button.primary { font-size: 28px; padding: 20px 60px; border-radius: 28px; }
-  .game { max-width: 700px; padding-top: 80px; }
-  .hud { padding: 20px 30px; }
-  .hud-left { font-size: 24px; }
-  .hud-center { font-size: 32px; }
-  .hud-right button { font-size: 20px; padding: 10px 20px; }
-  .question { font-size: 72px; margin: 30px 0 50px; }
-  .choices { gap: 30px; }
-  .choice { height: 140px; font-size: 56px; border-radius: 24px; }
-  .bonus-label { font-size: 24px; margin-bottom: 20px; }
+  .logo { font-size: 80px; margin-bottom: 20px; }
+  .subtitle { font-size: 24px; }
+  .highscore-box { font-size: 20px; padding: 12px 24px; }
+  button.primary { font-size: 28px; padding: 20px 60px; border-radius: 28px; }
+
+  /* ขยายกล่องเกมให้ใหญ่ขึ้นแต่ไม่ล้น */
+  .game { max-width: 700px; padding-top: 80px; }
+  
+  /* ขยาย HUD */
+  .hud { padding: 20px 30px; }
+  .hud-left { font-size: 24px; }
+  .hud-center { font-size: 32px; }
+  .hud-right button { font-size: 20px; padding: 10px 20px; }
+
+  /* ขยายโจทย์และปุ่ม */
+  .question { font-size: 72px; margin: 30px 0 50px; }
+  .choices { gap: 30px; }
+  .choice { 
+    height: 140px; /* เพิ่มความสูงปุ่มให้กดง่าย */
+    font-size: 56px; /* ตัวเลขใหญ่ชัด */
+    border-radius: 24px; 
+  }
+  .bonus-label { font-size: 24px; margin-bottom: 20px; }
 }
 
 .success-pop { animation: successPop 0.4s ease-out; background-color: #22c55e !important; pointer-events: none; }
@@ -138,371 +165,441 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 <body>
 
 <div id="intro-overlay" onclick="handleTapStart(event)" ontouchend="handleTapStart(event)">
-  <p>แตะหน้าจอเพื่อเริ่มเกม</p>
+  <p>แตะหน้าจอเพื่อเริ่มเกม</p>
 </div>
 
 <div id="menu" class="screen active menu-screen">
-  <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span></div>
-  <div class="menu-content">
-    <h1 class="logo">Math<br>Block<br>Choice</h1>
-    <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
-    <div class="highscore-box">🏆 สถิติสูงสุด: <span id="menuHighScore">0</span></div><br>
-    <button class="primary" onclick="startGame()">เริ่มเกม</button>
-  </div>
+  <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span></div>
+  <div class="menu-content">
+    <h1 class="logo">Math<br>Block<br>Choice</h1>
+    <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
+    <div class="highscore-box">🏆 สถิติสูงสุด: <span id="menuHighScore">0</span></div>
+    <div class="lastscore-box">เกมล่าสุด: <span id="menuLastScore">0</span></div>
+    <button class="primary" onclick="startGame()">เริ่มเกม</button><br>
+    
+        <button class="history-btn" onclick="showHistory()">
+      <img src="paper-icon.png" alt="History" id="historyImg">       <span>ประวัติการเล่น</span>
+    </button>
+  </div>
+</div>
+
+<div id="history-screen" class="screen">
+  <h2>ประวัติการเล่น</h2>
+  <div class="history-container" id="historyList">
+      </div><br>
+  <button class="primary" onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
 <div id="countdown" class="screen">
-  <div class="big" id="countNum">3</div><p>เตรียมพร้อม</p><br>
-  <button class="primary" onclick="skipCountdown()">ข้าม</button>
+  <div class="big" id="countNum">3</div><p>เตรียมพร้อม</p><br>
+  <button class="primary" onclick="skipCountdown()">ข้าม</button>
 </div>
 
 <div id="game" class="screen">
-  <div class="hud">
-    <div class="hud-left">❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span></div>
-    <div class="hud-center">⏱ <span id="time">10</span></div>
-    <div class="hud-right"><button onclick="pauseGame()">หยุด</button></div>
-  </div>
-  <div class="game" id="gameContainer">
-    <div id="bonusLabel" class="bonus-label">✨ BONUS: รับหัวใจคืน! ✨</div>
-    <div class="question" id="question"></div>
-    <div class="choices">
-      <button id="btn0" class="choice" onclick="choose(0)"></button>
-      <button id="btn1" class="choice" onclick="choose(1)"></button>
-      <button id="btn2" class="choice" onclick="choose(2)"></button>
-      <button id="btn3" class="choice" onclick="choose(3)"></button>
-    </div>
-  </div>
+  <div class="hud">
+    <div class="hud-left">❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span></div>
+    <div class="hud-center">⏱ <span id="time">10</span></div>
+    <div class="hud-right"><button onclick="pauseGame()">หยุด</button></div>
+  </div>
+  <div class="game" id="gameContainer">
+    <div id="bonusLabel" class="bonus-label">✨ BONUS: รับหัวใจคืน! ✨</div>
+    <div class="question" id="question"></div>
+    <div class="choices">
+      <button id="btn0" class="choice" onclick="choose(0)"></button>
+      <button id="btn1" class="choice" onclick="choose(1)"></button>
+      <button id="btn2" class="choice" onclick="choose(2)"></button>
+      <button id="btn3" class="choice" onclick="choose(3)"></button>
+    </div>
+  </div>
 </div>
 
 <div id="pause" class="screen">
-  <h2>หยุดเกม</h2><br>
-  <button class="primary" onclick="resumeGame()">เล่นต่อ</button><br><br>
-  <button onclick="backMenu()">กลับหน้าแรก</button>
+  <h2>หยุดเกม</h2><br>
+  <button class="primary" onclick="resumeGame()">เล่นต่อ</button><br><br>
+  <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
 <div id="over" class="screen">
-  <div class="big">GAME OVER</div>
-  <div class="score-info">
-    <p>คะแนนของคุณ: <span id="final" style="font-weight:bold; font-size:28px;">0</span></p>
-    <p style="font-size:16px; color:#6b7280; margin-top:5px;">🏆 สถิติสูงสุด: <span id="bestScore">0</span></p>
-    <p id="newRecordMsg" class="new-record">🎉 ยินดีด้วย! สถิติใหม่ 🎉</p>
-  </div>
-  <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
-  <button onclick="backMenu()">กลับหน้าแรก</button>
+  <div class="big">GAME OVER</div>
+  <div class="score-info">
+    <p>คะแนนของคุณ: <span id="final" style="font-weight:bold; font-size:28px;">0</span></p>
+    <p style="font-size:16px; color:#6b7280; margin-top:5px;">🏆 สถิติสูงสุด: <span id="bestScore">0</span></p>
+    <p id="newRecordMsg" class="new-record">🎉 ยินดีด้วย! สถิติใหม่ 🎉</p>
+  </div>
+  <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
+  <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
 <script>
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
 let isBonus=false, bonusCooldown=false, lastQuestionText="";
 let inputLocked = false;
+let gameStartTime = 0; // เก็บเวลาเริ่มเล่น
 let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
+let lastScore = parseInt(localStorage.getItem('mathBlockLastScore')) || 0;
+let playHistory = JSON.parse(localStorage.getItem('mathBlockHistory')) || [];
+
 let audioInited = false;
 const $ = id => document.getElementById(id);
 $("menuHighScore").textContent = highScore;
+$("menuLastScore").textContent = lastScore;
 
 let audioCtx = null;
 let soundBuffers = {};
 let bgSources = { menu: null, game: null, bonus: null };
 
 async function loadSound(name, url) {
-  try {
-    const response = await fetch(url);
-    if(!response.ok) throw new Error("File not found");
-    const arrayBuffer = await response.arrayBuffer();
-    soundBuffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
-  } catch(e) { console.log("Sound error:", name); }
+  try {
+    const response = await fetch(url);
+    if(!response.ok) throw new Error("File not found");
+    const arrayBuffer = await response.arrayBuffer();
+    soundBuffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
+  } catch(e) { console.log("Sound error:", name); }
 }
 
 function playSFX(name) {
-  if (!audioCtx || !soundBuffers[name]) return;
-  const source = audioCtx.createBufferSource();
-  source.buffer = soundBuffers[name];
-  source.connect(audioCtx.destination);
-  source.start(0);
+  if (!audioCtx || !soundBuffers[name]) return;
+  const source = audioCtx.createBufferSource();
+  source.buffer = soundBuffers[name];
+  source.connect(audioCtx.destination);
+  source.start(0);
 }
 
 function playBGM(type) {
-  stopAllBGM();
-  if (!audioCtx || !soundBuffers[type]) return;
-  const source = audioCtx.createBufferSource();
-  source.buffer = soundBuffers[type];
-  source.loop = true;
-  const gainNode = audioCtx.createGain();
-  gainNode.gain.value = 0.4;
-  source.connect(gainNode).connect(audioCtx.destination);
-  source.start(0);
-  bgSources[type] = { source, gainNode, startTime: audioCtx.currentTime, pausedAt: 0 };
+  stopAllBGM();
+  if (!audioCtx || !soundBuffers[type]) return;
+  const source = audioCtx.createBufferSource();
+  source.buffer = soundBuffers[type];
+  source.loop = true;
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.value = 0.4;
+  source.connect(gainNode).connect(audioCtx.destination);
+  source.start(0);
+  bgSources[type] = { source, gainNode, startTime: audioCtx.currentTime, pausedAt: 0 };
 }
 
 function stopAllBGM() {
-  for (let key in bgSources) {
-    if (bgSources[key]) {
-      try { bgSources[key].source.stop(); } catch(e) {}
-      bgSources[key] = null;
-    }
-  }
+  for (let key in bgSources) {
+    if (bgSources[key]) {
+      try { bgSources[key].source.stop(); } catch(e) {}
+      bgSources[key] = null;
+    }
+  }
 }
 
 function pauseBGM() {
-  let type = isBonus ? 'bonus' : 'game';
-  if (bgSources[type]) {
-    bgSources[type].pausedAt = audioCtx.currentTime - bgSources[type].startTime;
-    try { bgSources[type].source.stop(); } catch(e) {}
-  }
+  let type = isBonus ? 'bonus' : 'game';
+  if (bgSources[type]) {
+    bgSources[type].pausedAt = audioCtx.currentTime - bgSources[type].startTime;
+    try { bgSources[type].source.stop(); } catch(e) {}
+  }
 }
 
 function resumeBGM() {
-  let type = isBonus ? 'bonus' : 'game';
-  if (bgSources[type]) {
-    const prevOffset = bgSources[type].pausedAt;
-    const source = audioCtx.createBufferSource();
-    source.buffer = soundBuffers[type];
-    source.loop = true;
-    const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.4;
-    source.connect(gainNode).connect(audioCtx.destination);
-    source.start(0, prevOffset % soundBuffers[type].duration);
-    bgSources[type] = { source, gainNode, startTime: audioCtx.currentTime - prevOffset, pausedAt: 0 };
-  }
+  let type = isBonus ? 'bonus' : 'game';
+  if (bgSources[type]) {
+    const prevOffset = bgSources[type].pausedAt;
+    const source = audioCtx.createBufferSource();
+    source.buffer = soundBuffers[type];
+    source.loop = true;
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.4;
+  source.connect(gainNode).connect(audioCtx.destination);
+  source.start(0, prevOffset % soundBuffers[type].duration);
+  bgSources[type] = { source, gainNode, startTime: audioCtx.currentTime - prevOffset, pausedAt: 0 };
+  }
 }
 
+// แก้ปัญหาแตะไม่ติดใน iPad/Mobile
 async function handleTapStart(e) {
-  if (e.type === 'touchend') e.preventDefault();
-  if (audioInited) return;
-  
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === 'suspended') {
-    await audioCtx.resume();
-  }
+  if (e.type === 'touchend') e.preventDefault();
+  if (audioInited) return;
+  
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    await audioCtx.resume();
+  }
 
-  audioInited = true;
-  $("intro-overlay").classList.add("hidden");
+  audioInited = true;
+  $("intro-overlay").classList.add("hidden");
 
-  const sounds = [
-    ['menu', 'sound/bg_menu.mp3'], ['game', 'sound/bg_game.mp3'],
-    ['bonus', 'sound/bonus.mp3'], 
-    ['click', 'sound/click.mp3'], ['correct', 'sound/correct.mp3'],
-    ['wrong', 'sound/wrong.mp3'], ['over', 'sound/gameover.mp3']
-  ];
+  const sounds = [
+    ['menu', 'sound/bg_menu.mp3'], ['game', 'sound/bg_game.mp3'],
+    ['bonus', 'sound/bonus.mp3'], 
+    ['click', 'sound/click.mp3'], ['correct', 'sound/correct.mp3'],
+    ['wrong', 'sound/wrong.mp3'], ['over', 'sound/gameover.mp3']
+  ];
 
-  Promise.all(sounds.map(s => loadSound(s[0], s[1]))).then(() => {
-    playSFX('click');
-    playBGM('menu');
-  });
+  Promise.all(sounds.map(s => loadSound(s[0], s[1]))).then(() => {
+    playSFX('click');
+    playBGM('menu');
+  });
 
-  initMagneticButtons();
+  initMagneticButtons();
 }
 
 function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  $(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
 }
 
 function updateHighScore() {
-  if (score > highScore) {
-    highScore = score;
-    localStorage.setItem('mathBlockHighScore', highScore);
-    return true;
-  }
-  return false;
+  localStorage.setItem('mathBlockLastScore', score);
+  $("menuLastScore").textContent = score;
+
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('mathBlockHighScore', highScore);
+    return true;
+  }
+  return false;
+}
+
+// ฟังก์ชันบันทึกประวัติ
+function saveToHistory() {
+  const now = new Date();
+  const dateStr = `${now.getDate()}/${now.getMonth()+1} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const playTime = Math.floor((Date.now() - gameStartTime) / 1000); // วินาที
+  
+  const record = {
+    score: score,
+    date: dateStr,
+    duration: playTime
+  };
+
+  playHistory.unshift(record); // เพิ่มใหม่สุดไว้หน้าสุด
+  if(playHistory.length > 20) playHistory.pop(); // เก็บแค่ 20 อันล่าสุด
+  localStorage.setItem('mathBlockHistory', JSON.stringify(playHistory));
+}
+
+function showHistory() {
+  playSFX('click');
+  let html = "";
+  if(playHistory.length === 0) {
+    html = "<p style='text-align:center; color:#9ca3af; padding:20px;'>ยังไม่มีประวัติการเล่น</p>";
+  } else {
+    playHistory.forEach(item => {
+      html += `
+        <div class="history-item">
+          <div>📅 ${item.date}</div>
+          <div>⏱ ${item.duration} วิ</div>
+          <div style="font-weight:bold; color:#2563eb;">🏆 ${item.score}</div>
+        </div>`;
+    });
+  }
+  $("historyList").innerHTML = html;
+  showScreen('history-screen');
 }
 
 function startGame(){
-  playSFX('click');
-  stopAllBGM();
-  score=0; heart=3; isBonus=false; bonusCooldown=false;
-  $("score").textContent=score; $("heart").textContent=heart;
-  startCountdown();
+  playSFX('click');
+  stopAllBGM();
+  score=0; heart=3; isBonus=false; bonusCooldown=false;
+  gameStartTime = Date.now(); // เริ่มจับเวลาการเล่น
+  $("score").textContent=score; $("heart").textContent=heart;
+  startCountdown();
 }
 
 function startCountdown(){
-  showScreen('countdown');
-  let c=3; $("countNum").textContent=c; playSFX('click');
-  clearInterval(countdownTimer);
-  countdownTimer=setInterval(()=>{
-    c--;
-    if(c>0) { $("countNum").textContent=c; playSFX('click'); }
-    else { clearInterval(countdownTimer); showGame(); }
-  },1000);
+  showScreen('countdown');
+  let c=3; $("countNum").textContent=c; playSFX('click');
+  clearInterval(countdownTimer);
+  countdownTimer=setInterval(()=>{
+    c--;
+    if(c>0) { $("countNum").textContent=c; playSFX('click'); }
+    else { clearInterval(countdownTimer); showGame(); }
+  },1000);
 }
 
 function skipCountdown(){ playSFX('click'); clearInterval(countdownTimer); showGame(); }
 
 function showGame(){
-  paused=false;
-  showScreen('game'); 
-  playBGM('game'); 
-  nextQuestion();
+  paused=false;
+  showScreen('game'); 
+  playBGM('game'); 
+  nextQuestion();
 }
 
 function pauseGame(){ playSFX('click'); paused=true; pauseBGM(); showScreen('pause'); }
 
-function resumeGame(){ 
-  playSFX('click'); paused=false; resumeBGM(); showScreen('game'); 
+function resumeGame(){ 
+  playSFX('click'); paused=false; resumeBGM(); showScreen('game'); 
 }
 
-function backMenu(){ 
-  playSFX('click'); clearInterval(timer);
-  updateHighScore();
-  stopAllBGM(); playBGM('menu');
-  paused = false; 
-  $("menuHighScore").textContent = highScore;
-  showScreen('menu'); 
+function backMenu(){ 
+  playSFX('click'); clearInterval(timer);
+  updateHighScore();
+  stopAllBGM(); playBGM('menu');
+  paused = false; // --- แก้ไขบั๊ก 2: รีเซ็ตสถานะ paused เพื่อให้ปุ่มกลับมาขยับได้ ---
+  $("menuHighScore").textContent = highScore;
+  showScreen('menu'); 
 }
 
 function calculate(a, op, b) {
-  if (op === "+") return a + b;
-  if (op === "-") return a - b;
-  if (op === "×") return a * b;
-  if (op === "÷") return a / b;
-  return 0;
+  if (op === "+") return a + b;
+  if (op === "-") return a - b;
+  if (op === "×") return a * b;
+  if (op === "÷") return a / b;
+  return 0;
 }
 
 function nextQuestion(){
-  clearInterval(timer);
-  inputLocked = false; 
-  time=10; $("time").textContent=time;
-  for(let i=0; i<4; i++) {
-    let btn = $("btn"+i);
-    btn.className = 'choice';
-    btn.style.transform = ""; 
-    btn.style.transition = ""; 
-  }
+  clearInterval(timer);
+  inputLocked = false; 
+  time=10; $("time").textContent=time;
+  for(let i=0; i<4; i++) {
+    let btn = $("btn"+i);
+    btn.className = 'choice';
+    btn.style.transform = ""; 
+    btn.style.transition = ""; // Reset transition styles
+  }
 
-  if (heart < 3 && !bonusCooldown && Math.random() < 0.1) {
-    isBonus = true; bonusCooldown = true;
-    if(soundBuffers['bonus']) playBGM('bonus');
-  } else {
-    if(isBonus) playBGM('game');
-    isBonus = false; bonusCooldown = false;
-  }
+  if (heart < 3 && !bonusCooldown && Math.random() < 0.1) {
+    isBonus = true; bonusCooldown = true;
+    if(soundBuffers['bonus']) playBGM('bonus');
+  } else {
+    if(isBonus) playBGM('game');
+    isBonus = false; bonusCooldown = false;
+  }
 
-  $("gameContainer").className = isBonus ? "game gold-mode" : "game";
-  $("bonusLabel").style.display = isBonus ? "block" : "none";
+  $("gameContainer").className = isBonus ? "game gold-mode" : "game";
+  $("bonusLabel").style.display = isBonus ? "block" : "none";
 
-  let expr = "", ans = 0;
-  
-  do {
-    let level = isBonus ? 4 : (score >= 300 ? 4 : (score >= 150 ? 3 : 2));
-    
-    if (level === 2) {
-      const ops=["+","-","×","÷"];
-      const op=ops[Math.floor(Math.random()*ops.length)];
-      let a, b;
-      if(op==="+"){ a=Math.floor(Math.random()*30)+1; b=Math.floor(Math.random()*30)+1; ans=a+b; }
-      else if(op==="-"){ a=Math.floor(Math.random()*30)+10; b=Math.floor(Math.random()*15)+1; ans=a-b; }
-      else if(op==="×"){ a=Math.floor(Math.random()*12)+1; b=Math.floor(Math.random()*9)+1; ans=a*b; }
-      else { b=Math.floor(Math.random()*9)+1; ans=Math.floor(Math.random()*9)+1; a=b*ans; }
-      expr = `${a} ${op} ${b}`;
-    } else if (level === 3) {
-      let a=Math.floor(Math.random()*15)+1, b=Math.floor(Math.random()*10)+1, c=Math.floor(Math.random()*10)+1;
-      let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)];
-      if(Math.random() > 0.5) {
-         if (Math.random() > 0.5) {
-           ans = calculate(calculate(a, op1, b), op2, c);
-           expr = `(${a} ${op1} ${b}) ${op2} ${c}`;
-         } else {
-           ans = calculate(a, op2, calculate(b, op1, c));
-           expr = `${a} ${op2} (${b} ${op1} ${c})`;
-         }
-      } else {
-         expr = `${a} ${op1} ${b} ${op2} ${c}`;
-         let safeExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
-         ans = new Function('return ' + safeExpr)();
-         ans = Math.floor(ans); 
-      }
-    } else {
-      let a=Math.floor(Math.random()*10)+2, b=Math.floor(Math.random()*10)+2, c=Math.floor(Math.random()*10)+1, d=Math.floor(Math.random()*10)+1;
-      let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)], op3=["+","-"][Math.floor(Math.random()*2)];
-      if(Math.random() > 0.5) {
-          ans = calculate(calculate(a, op1, b), op2, calculate(c, op3, d));
-          expr = `(${a} ${op1} ${b}) ${op2} (${c} ${op3} ${d})`;
-      } else {
-          expr = `${a} ${op1} ${b} ${op2} ${c} ${op3} ${d}`;
-          let safeExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
-          ans = new Function('return ' + safeExpr)();
-          ans = Math.floor(ans);
-      }
-    }
-  } while (ans < 0 || ans > 500 || !Number.isInteger(ans) || expr === lastQuestionText);
+  let expr = "", ans = 0;
+  
+  do {
+    let level = isBonus ? 4 : (score >= 300 ? 4 : (score >= 150 ? 3 : 2));
+    
+    if (level === 2) {
+      const ops=["+","-","×","÷"];
+      const op=ops[Math.floor(Math.random()*ops.length)];
+      let a, b;
+      if(op==="+"){ a=Math.floor(Math.random()*30)+1; b=Math.floor(Math.random()*30)+1; ans=a+b; }
+      else if(op==="-"){ a=Math.floor(Math.random()*30)+10; b=Math.floor(Math.random()*15)+1; ans=a-b; }
+      else if(op==="×"){ a=Math.floor(Math.random()*12)+1; b=Math.floor(Math.random()*9)+1; ans=a*b; }
+      else { b=Math.floor(Math.random()*9)+1; ans=Math.floor(Math.random()*9)+1; a=b*ans; }
+      expr = `${a} ${op} ${b}`;
+    } else if (level === 3) {
+      let a=Math.floor(Math.random()*15)+1, b=Math.floor(Math.random()*10)+1, c=Math.floor(Math.random()*10)+1;
+      let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)];
+      
+      if(Math.random() > 0.5) {
+         if (Math.random() > 0.5) {
+           ans = calculate(calculate(a, op1, b), op2, c);
+           expr = `(${a} ${op1} ${b}) ${op2} ${c}`;
+         } else {
+           ans = calculate(a, op2, calculate(b, op1, c));
+           expr = `${a} ${op2} (${b} ${op1} ${c})`;
+         }
+      } else {
+         expr = `${a} ${op1} ${b} ${op2} ${c}`;
+         let safeExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
+         ans = new Function('return ' + safeExpr)();
+         ans = Math.floor(ans); 
+      }
+    } else {
+      let a=Math.floor(Math.random()*10)+2, b=Math.floor(Math.random()*10)+2, c=Math.floor(Math.random()*10)+1, d=Math.floor(Math.random()*10)+1;
+      let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)], op3=["+","-"][Math.floor(Math.random()*2)];
+      
+      if(Math.random() > 0.5) {
+          ans = calculate(calculate(a, op1, b), op2, calculate(c, op3, d));
+          expr = `(${a} ${op1} ${b}) ${op2} (${c} ${op3} ${d})`;
+      } else {
+          expr = `${a} ${op1} ${b} ${op2} ${c} ${op3} ${d}`;
+          let safeExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
+          ans = new Function('return ' + safeExpr)();
+          ans = Math.floor(ans);
+      }
+    }
+  } while (ans < 0 || ans > 500 || !Number.isInteger(ans) || expr === lastQuestionText);
 
-  lastQuestionText = expr;
-  $("question").textContent = expr + " = ?";
+  lastQuestionText = expr;
+  $("question").textContent = expr + " = ?";
 
-  let answers=[ans];
-  while(answers.length<4){
-    let w=ans+(Math.floor(Math.random()*21)-10);
-    if(w>=0 && !answers.includes(w)) answers.push(w);
-  }
-  answers.sort(()=>Math.random()-0.5);
-  correctIndex=answers.indexOf(ans);
-  for(let i=0; i<4; i++) $("btn"+i).textContent=answers[i];
+  let answers=[ans];
+  while(answers.length<4){
+    let w=ans+(Math.floor(Math.random()*21)-10);
+    if(w>=0 && !answers.includes(w)) answers.push(w);
+  }
+  answers.sort(()=>Math.random()-0.5);
+  correctIndex=answers.indexOf(ans);
+  for(let i=0; i<4; i++) $("btn"+i).textContent=answers[i];
 
-  timer=setInterval(()=>{
-    if(!paused){
-      time--; $("time").textContent=time;
-      if(time<=0) { playSFX('wrong'); fail(null); }
-    }
-  },1000);
+  timer=setInterval(()=>{
+    if(!paused){
+      time--; $("time").textContent=time;
+      if(time<=0) { playSFX('wrong'); fail(null); }
+    }
+  },1000);
 }
 
 function choose(idx){
-  if(paused || inputLocked || heart <= 0) return;
-  clearInterval(timer);
-  inputLocked = true;
-  if(idx===correctIndex){
-    playSFX('correct');
-    $("btn"+idx).classList.add('success-pop');
-    score+=10; $("score").textContent=score;
-    if(isBonus) { heart = Math.min(3, heart + 1); $("heart").textContent=heart; }
-    setTimeout(nextQuestion, 400); 
-  } else {
-    playSFX('wrong');
-    $("btn"+idx).classList.add('error-shake');
-    fail(idx); 
-  }
+  if(paused || inputLocked || heart <= 0) return;
+  
+  clearInterval(timer);
+  inputLocked = true;
+
+  if(idx===correctIndex){
+    playSFX('correct');
+    $("btn"+idx).classList.add('success-pop');
+    score+=10; $("score").textContent=score;
+    if(isBonus) { heart = Math.min(3, heart + 1); $("heart").textContent=heart; }
+    setTimeout(nextQuestion, 400); 
+  } else {
+    playSFX('wrong');
+    $("btn"+idx).classList.add('error-shake');
+    fail(idx); 
+  }
 }
 
 function fail(idx){
-  if(!isBonus) heart--; 
-  $("heart").textContent=heart;
-  if(heart<=0) { 
-    inputLocked = true;
-    setTimeout(gameOver, 400); 
-  } else { 
-    if(idx !== null) setTimeout(nextQuestion, 400); 
-    else nextQuestion(); 
-  }
+  if(!isBonus) heart--; 
+  $("heart").textContent=heart;
+  
+  if(heart<=0) { 
+    inputLocked = true;
+    setTimeout(gameOver, 400); 
+  } else { 
+    if(idx !== null) setTimeout(nextQuestion, 400); 
+    else nextQuestion(); 
+  }
 }
 
 function gameOver(){
-  clearInterval(timer); stopAllBGM(); playSFX('over');
-  $("final").textContent=score;
-  const isNew = updateHighScore();
-  $("bestScore").textContent = highScore;
-  $("newRecordMsg").style.display = isNew ? "block" : "none";
-  showScreen('over');
+  clearInterval(timer); stopAllBGM(); playSFX('over');
+  saveToHistory(); // บันทึกประวัติ
+  $("final").textContent=score;
+  const isNew = updateHighScore();
+  $("bestScore").textContent = highScore;
+  $("newRecordMsg").style.display = isNew ? "block" : "none";
+  showScreen('over');
 }
 
+// --- Magnetic Effect (Fixed for smoothness & iPad) ---
 function initMagneticButtons() {
-  const btns = document.querySelectorAll('button.choice, button.primary');
-  btns.forEach(btn => {
-    btn.addEventListener('pointermove', function(e) {
-      if(btn.classList.contains('success-pop') || btn.classList.contains('error-shake') || paused) return;
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      btn.style.transition = 'none'; 
-      btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px) scale(1.02)`;
-    });
-    btn.addEventListener('pointerleave', function() {
-      if(btn.classList.contains('success-pop') || btn.classList.contains('error-shake')) return;
-      btn.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; 
-      btn.style.transform = ''; 
-    });
-  });
+  const btns = document.querySelectorAll('button.choice, button.primary, .history-btn');
+  
+  btns.forEach(btn => {
+    btn.addEventListener('pointermove', function(e) {
+      if(btn.classList.contains('success-pop') || btn.classList.contains('error-shake') || paused) return;
+
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+
+      btn.style.transition = 'none'; 
+      btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px) scale(1.02)`;
+    });
+
+    btn.addEventListener('pointerleave', function() {
+      if(btn.classList.contains('success-pop') || btn.classList.contains('error-shake')) return;
+      
+      btn.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; 
+      btn.style.transform = ''; 
+    });
+  });
 }
 </script>
 </body>
