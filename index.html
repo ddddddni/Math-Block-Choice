@@ -152,9 +152,12 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   border-bottom: 1px solid #f3f4f6; font-size: 14px;
 }
 
-/* ปุ่มประวัติที่มุมขวาบน (ปรับปรุงให้มีข้อความ) */
+/* ปุ่มประวัติที่มุมขวาบน (ปรับตำแหน่งลงมาแล้ว) */
 .history-top-btn {
-  position: absolute; top: 20px; right: 20px; z-index: 50;
+  position: absolute; 
+  top: 50px;  /* ปรับลงมาจาก 20px เพื่อให้ไม่ชิดขอบบนเกินไป */
+  right: 25px; 
+  z-index: 50;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   cursor: pointer; transition: transform 0.2s;
 }
@@ -184,7 +187,7 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 
 <div id="menu" class="screen active menu-screen">
   <div class="history-top-btn" onclick="openHistory()">
-    <img src="ใส่ลิงก์รูปภาพกระดาษของคุณที่นี่.png" alt="History">
+    <img src="paper-icon.png" alt="History">
     <span>ประวัติ</span>
   </div>
 
@@ -438,7 +441,7 @@ function resumeGame(){
   playSFX('click'); paused=false; resumeBGM(); showScreen('game'); 
 }
 
-/* --- แก้ไข: ฟังก์ชันกลับหน้าเมนู ให้บันทึกคะแนนถ้ามีการเล่นเกิดขึ้น --- */
+/* --- ฟังก์ชันกลับหน้าเมนู พร้อมระบบบันทึกคะแนน --- */
 function backMenu(){ 
   playSFX('click'); 
   clearInterval(timer);
