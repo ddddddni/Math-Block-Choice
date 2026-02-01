@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-512.png">
 
 <style>
-/* --- CSS ต้นฉบับ 100% --- */
+/* --- CSS ต้นฉบับ --- */
 button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -71,15 +71,27 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 .subtitle{ color:#6b7280; margin-bottom:20px; }
 .highscore-box {
   background: #f3f4f6; padding: 8px 16px; border-radius: 12px;
-  display: inline-block; margin-bottom: 30px; font-weight: 600; color: #4b5563;
+  display: inline-flex; align-items: center; gap: 8px; /* จัดรูปกับข้อความให้อยู่ด้วยกัน */
+  margin-bottom: 30px; font-weight: 600; color: #4b5563;
 }
 .hud{
   position:fixed; top:0;left:0; width:100%; padding:10px 14px;
   display:flex; justify-content:space-between; align-items:center;
   background:#ffffffcc; backdrop-filter:blur(6px); z-index:10;
 }
-.hud-left{font-size:14px} .hud-center{font-size:18px;font-weight:700}
+.hud-left, .hud-center {
+    display: flex; align-items: center; /* จัดรูปกับตัวเลขให้ตรงกัน */
+}
+.hud-left{font-size:14px; gap: 5px;} 
+.hud-center{font-size:18px;font-weight:700; gap: 5px;}
 .hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; transition: transform 0.2s; }
+
+/* CSS สำหรับไอคอนรูปภาพ (ขนาดเล็ก) */
+.icon-sm {
+    height: 28px; width: auto; 
+    vertical-align: middle;
+    display: inline-block;
+}
 
 .game{ 
   padding-top:60px; width:100%; max-width:420px; 
@@ -124,6 +136,7 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   .choices { gap: 30px; }
   .choice { height: 140px; font-size: 56px; border-radius: 24px; }
   .bonus-label { font-size: 24px; margin-bottom: 20px; }
+  .icon-sm { height: 40px; } /* ขยายไอคอนบนจอใหญ่ */
 }
 
 .success-pop { animation: successPop 0.4s ease-out; background-color: #22c55e !important; pointer-events: none; }
@@ -152,10 +165,10 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   border-bottom: 1px solid #f3f4f6; font-size: 14px;
 }
 
-/* ปุ่มประวัติที่มุมขวาบน (ปรับตำแหน่งลงมาแล้ว) */
+/* ปุ่มประวัติที่มุมขวาบน */
 .history-top-btn {
   position: absolute; 
-  top: 50px;  /* ปรับลงมาจาก 20px เพื่อให้ไม่ชิดขอบบนเกินไป */
+  top: 50px; 
   right: 25px; 
   z-index: 50;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -195,7 +208,9 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   <div class="menu-content">
     <h1 class="logo">Math<br>Block<br>Choice</h1>
     <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
-    <div class="highscore-box">🏆 สถิติสูงสุด: <span id="menuHighScore">0</span></div><br>
+    <div class="highscore-box">
+        <img src="trophy.png" class="icon-sm" alt="Trophy"> สถิติสูงสุด: <span id="menuHighScore">0</span>
+    </div><br>
     <button class="primary" onclick="startGame()">เริ่มเกม</button>
   </div>
 </div>
@@ -216,8 +231,14 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 
 <div id="game" class="screen">
   <div class="hud">
-    <div class="hud-left">❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span></div>
-    <div class="hud-center">⏱ <span id="time">10</span></div>
+    <div class="hud-left">
+        <img src="heart.png" class="icon-sm" alt="Heart"> <span id="heart">3</span> 
+        <span style="margin: 0 5px; opacity: 0.3">|</span> 
+        <img src="score.png" class="icon-sm" alt="Score"> <span id="score">0</span>
+    </div>
+    <div class="hud-center">
+        <img src="clock.png" class="icon-sm" alt="Clock"> <span id="time">10</span>
+    </div>
     <div class="hud-right"><button onclick="pauseGame()">หยุด</button></div>
   </div>
   <div class="game" id="gameContainer">
@@ -242,7 +263,9 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   <div class="big">GAME OVER</div>
   <div class="score-info">
     <p>คะแนนของคุณ: <span id="final" style="font-weight:bold; font-size:28px;">0</span></p>
-    <p style="font-size:16px; color:#6b7280; margin-top:5px;">🏆 สถิติสูงสุด: <span id="bestScore">0</span></p>
+    <p style="font-size:16px; color:#6b7280; margin-top:5px; display:flex; align-items:center; justify-content:center; gap:5px;">
+        <img src="trophy.png" class="icon-sm" style="height:20px;" alt="Trophy"> สถิติสูงสุด: <span id="bestScore">0</span>
+    </p>
     <p id="newRecordMsg" class="new-record">🎉 ยินดีด้วย! สถิติใหม่ 🎉</p>
   </div>
   <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
