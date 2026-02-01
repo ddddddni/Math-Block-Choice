@@ -4,11 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Math Block Choice</title>
-
 <style>
-/* ลดดีเลย์การแตะบนมือถือ */
 button { touch-action: manipulation; }
-
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:system-ui,sans-serif;
@@ -18,8 +15,6 @@ body{
   transition:background .3s;
   user-select: none; -webkit-user-select: none;
 }
-
-/* หน้ากาก Intro Overlay */
 #intro-overlay {
   position: fixed; inset: 0;
   background-color: rgba(255, 255, 255, 0.85);
@@ -36,12 +31,9 @@ body{
 }
 @keyframes pulseText { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 #intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-
-/* ---------- COMMON ---------- */
 .screen{ display:none; height:100vh; width:100%; }
 .menu-screen.active { display: flex; }
 .active{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
-
 button{ border:none; cursor:pointer; }
 button.primary{
   background:#2563eb; color:white; font-size:20px;
@@ -49,10 +41,7 @@ button.primary{
   transition: transform 0.1s, background 0.2s;
 }
 button.primary:active { transform: scale(0.95); background: #1d4ed8; }
-
 .big{font-size:64px;font-weight:800}
-
-/* ---------- MENU ---------- */
 .menu-screen{ position:relative; background:#ffffff; overflow:hidden; }
 .math-bg{ position:absolute; inset:0; pointer-events:none; }
 .math-bg span{
@@ -66,7 +55,6 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
 .math-bg span:nth-child(5){top:55%;left:45%}
 .math-bg span:nth-child(6){top:70%;right:35%}
 @keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
-
 .menu-content{ position:relative; z-index:2; text-align:center; padding:20px; }
 .logo{ font-size:56px; font-weight:900; line-height:1.1; margin-bottom:14px; }
 .subtitle{ color:#6b7280; margin-bottom:20px; }
@@ -74,8 +62,6 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
   background: #f3f4f6; padding: 8px 16px; border-radius: 12px;
   display: inline-block; margin-bottom: 30px; font-weight: 600; color: #4b5563;
 }
-
-/* ---------- HUD & GAME ---------- */
 .hud{
   position:fixed; top:0;left:0; width:100%; padding:10px 14px;
   display:flex; justify-content:space-between; align-items:center;
@@ -83,21 +69,39 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
 }
 .hud-left{font-size:14px} .hud-center{font-size:18px;font-weight:700}
 .hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; }
-
 .game{ padding-top:70px; width:100%; max-width:420px; text-align:center; }
 .question{ font-size:40px; margin:30px 0; }
 .choices{ display:grid; grid-template-columns:repeat(2,140px); gap:20px; justify-content:center; }
 .choice{
   width:140px; height:80px; font-size:28px; color:white;
-  border-radius:16px; transition:transform 0.1s; background:#2563eb;
+  border-radius:16px; transition:background 0.2s, transform 0.1s; background:#2563eb;
 }
-.choice:active{transform:scale(.9)}
+
+.success-pop {
+  animation: successPop 0.4s ease-out;
+  background-color: #22c55e !important;
+}
+@keyframes successPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.error-shake {
+  animation: errorShake 0.4s;
+  background-color: #ef4444 !important;
+}
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-8px); }
+}
 
 .score-info { font-size: 20px; margin: 10px 0 30px; color: #374151; }
 .new-record { color: #ea580c; font-weight: bold; display: none; }
 </style>
 </head>
-
 <body>
 
 <div id="intro-overlay" onclick="handleTapStart()">
@@ -167,20 +171,15 @@ const $ = id => document.getElementById(id);
 
 $("menuHighScore").textContent = highScore;
 
-// ฟังก์ชันเมื่อแตะหน้า Intro
 function handleTapStart() {
   initAudioContext();
   $("intro-overlay").classList.add("hidden");
   playSFX('sndClick');
 }
 
-// --- ระบบเสียงมาตรฐาน (Standard Audio) ---
 function playSFX(id) {
   const audio = $(id);
-  if (audio) {
-    audio.currentTime = 0; // รีเซ็ตเสียงให้เริ่มใหม่ทันที
-    audio.play().catch(()=>{});
-  }
+  if (audio) { audio.currentTime = 0; audio.play().catch(()=>{}); }
 }
 
 function playBGM(id) {
@@ -208,10 +207,9 @@ function showScreen(id){
   $(id).classList.add('active');
 }
 
-// --- LOGIC ---
 function startGame(){
   playSFX('sndClick');
-  stopBGM('bgMenu'); stopBGM('bgGame'); // เงียบเสียงเพลง
+  stopBGM('bgMenu'); stopBGM('bgGame');
   score=0; heart=3; 
   $("score").textContent=score; $("heart").textContent=heart;
   startCountdown();
@@ -251,6 +249,9 @@ function backMenu(){
 function nextQuestion(){
   clearInterval(timer);
   time=10; $("time").textContent=time;
+  for(let i=0; i<4; i++) {
+    $("btn"+i).className = 'choice';
+  }
   const ops=["+","-","×","÷"];
   const op=ops[Math.floor(Math.random()*ops.length)];
   let a, b, ans;
@@ -258,7 +259,6 @@ function nextQuestion(){
   else if(op==="-"){ a=Math.floor(Math.random()*20)+10; b=Math.floor(Math.random()*9)+1; ans=a-b; }
   else if(op==="×"){ a=Math.floor(Math.random()*9)+1; b=Math.floor(Math.random()*9)+1; ans=a*b; }
   else { b=Math.floor(Math.random()*9)+1; ans=Math.floor(Math.random()*9)+1; a=b*ans; }
-  
   $("question").textContent=`${a} ${op} ${b}`;
   let answers=[ans];
   while(answers.length<4){
@@ -268,27 +268,36 @@ function nextQuestion(){
   answers.sort(()=>Math.random()-0.5);
   correctIndex=answers.indexOf(ans);
   for(let i=0; i<4; i++) $("btn"+i).textContent=answers[i];
-
   timer=setInterval(()=>{
     if(!paused){
       time--; $("time").textContent=time;
-      if(time<=0) { playSFX('sndWrong'); fail(); }
+      if(time<=0) { playSFX('sndWrong'); fail(null); }
     }
   },1000);
 }
 
 function choose(idx){
+  if(paused) return;
   if(idx===correctIndex){
     playSFX('sndCorrect');
-    score+=10; $("score").textContent=score; nextQuestion();
+    $("btn"+idx).classList.add('success-pop');
+    score+=10; $("score").textContent=score;
+    setTimeout(nextQuestion, 400);
   } else {
-    playSFX('sndWrong'); fail();
+    playSFX('sndWrong');
+    $("btn"+idx).classList.add('error-shake');
+    fail(idx);
   }
 }
 
-function fail(){
+function fail(idx){
   heart--; $("heart").textContent=heart;
-  if(heart<=0) gameOver(); else nextQuestion();
+  if(heart<=0) {
+    setTimeout(gameOver, 400);
+  } else {
+    if(idx !== null) setTimeout(nextQuestion, 400);
+    else nextQuestion();
+  }
 }
 
 function gameOver(){
