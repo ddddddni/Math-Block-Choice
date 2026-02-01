@@ -15,7 +15,7 @@ body{
   transition:background .3s;
 }
 
-/* เพิ่มแผ่นใสสำหรับดักจับการคลิกครั้งแรกเพื่อเปิดเสียง */
+/* แผ่นใสสำหรับดักจับการคลิกครั้งแรกเพื่อเปิดระบบเสียง */
 #audio-unlocker {
   position: fixed;
   inset: 0;
@@ -37,10 +37,7 @@ body{
   justify-content:center;
 }
 
-button{
-  border:none;
-  cursor:pointer;
-}
+button{ border:none; cursor:pointer; }
 button.primary{
   background:#2563eb;
   color:white;
@@ -51,18 +48,8 @@ button.primary{
 .big{font-size:64px;font-weight:800}
 
 /* ---------- MENU DESIGN ---------- */
-.menu-screen{
-  position:relative;
-  background:#ffffff;
-  overflow:hidden;
-}
-
-.math-bg{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-}
-
+.menu-screen{ position:relative; background:#ffffff; overflow:hidden; }
+.math-bg{ position:absolute; inset:0; pointer-events:none; }
 .math-bg span{
   position:absolute;
   font-size:90px;
@@ -71,7 +58,6 @@ button.primary{
   opacity:0.9;
   animation:float 6s ease-in-out infinite;
 }
-
 .math-bg span:nth-child(1){top:8%;left:12%}
 .math-bg span:nth-child(2){top:22%;right:10%}
 .math-bg span:nth-child(3){bottom:25%;left:8%}
@@ -84,24 +70,9 @@ button.primary{
   50%{transform:translateY(-14px)}
 }
 
-.menu-content{
-  position:relative;
-  z-index:2;
-  text-align:center;
-  padding:20px;
-}
-
-.logo{
-  font-size:56px;
-  font-weight:900;
-  line-height:1.1;
-  margin-bottom:14px;
-}
-
-.subtitle{
-  color:#6b7280;
-  margin-bottom:36px;
-}
+.menu-content{ position:relative; z-index:2; text-align:center; padding:20px; }
+.logo{ font-size:56px; font-weight:900; line-height:1.1; margin-bottom:14px; }
+.subtitle{ color:#6b7280; margin-bottom:36px; }
 
 /* ---------- HUD ---------- */
 .hud{
@@ -118,39 +89,15 @@ button.primary{
 }
 .hud-left{font-size:14px}
 .hud-center{font-size:18px;font-weight:700}
-.hud-right button{
-  background:#e5e7eb;
-  padding:6px 12px;
-  border-radius:10px;
-}
+.hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; }
 
 /* ---------- GAME ---------- */
-.game{
-  padding-top:70px;
-  width:100%;
-  max-width:420px;
-  text-align:center;
-}
-.question{
-  font-size:40px;
-  margin:30px 0;
-}
-
-.choices{
-  display:grid;
-  grid-template-columns:repeat(2,140px);
-  gap:20px;
-  justify-content:center;
-}
-
+.game{ padding-top:70px; width:100%; max-width:420px; text-align:center; }
+.question{ font-size:40px; margin:30px 0; }
+.choices{ display:grid; grid-template-columns:repeat(2,140px); gap:20px; justify-content:center; }
 .choice{
-  width:140px;
-  height:80px;
-  font-size:28px;
-  color:white;
-  border-radius:16px;
-  transition:transform .15s;
-  background:#2563eb;
+  width:140px; height:80px; font-size:28px; color:white;
+  border-radius:16px; transition:transform .15s; background:#2563eb;
 }
 .choice:active{transform:scale(.9)}
 </style>
@@ -160,10 +107,12 @@ button.primary{
 
 <div id="audio-unlocker"></div>
 
-<audio id="bgMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3"></audio>
-<audio id="sndCount" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
-<audio id="sndCorrect" src="https://assets.mixkit.co/active_storage/sfx/270/270-preview.mp3"></audio>
-<audio id="sndWrong" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
+<audio id="bgMenu" loop src="sound/bg_menu.mp3"></audio>
+<audio id="bgGame" loop src="sound/bg_game.mp3"></audio>
+<audio id="sndClick" src="sound/click.mp3"></audio>
+<audio id="sndCorrect" src="sound/correct.mp3"></audio>
+<audio id="sndWrong" src="sound/wrong.mp3"></audio>
+<audio id="sndOver" src="sound/gameover.mp3"></audio>
 
 <div id="menu" class="screen active menu-screen">
   <div class="math-bg">
@@ -180,22 +129,17 @@ button.primary{
   <div class="big" id="countNum">3</div>
   <p>เตรียมพร้อม</p>
   <br>
-  <button class="primary" onclick="skipCountdown()">ข้าม</button>
+  <button class="primary" onclick="playSnd('sndClick'); skipCountdown()">ข้าม</button>
 </div>
 
 <div id="game" class="screen">
   <div class="hud">
-    <div class="hud-left">
-      ❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span>
-    </div>
-    <div class="hud-center">
-      ⏱ <span id="time">10</span>
-    </div>
+    <div class="hud-left">❤️ <span id="heart">3</span> | 🏆 <span id="score">0</span></div>
+    <div class="hud-center">⏱ <span id="time">10</span></div>
     <div class="hud-right">
       <button onclick="pauseGame()">หยุด</button>
     </div>
   </div>
-
   <div class="game">
     <div class="question" id="question"></div>
     <div class="choices">
@@ -208,45 +152,42 @@ button.primary{
 </div>
 
 <div id="pause" class="screen">
-  <h2>หยุดเกม</h2>
-  <br>
-  <button class="primary" onclick="resumeGame()">เล่นต่อ</button>
-  <br><br>
+  <h2>หยุดเกม</h2><br>
+  <button class="primary" onclick="resumeGame()">เล่นต่อ</button><br><br>
   <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
 <div id="over" class="screen">
   <div class="big">GAME OVER</div>
-  <p>คะแนน: <span id="final"></span></p>
-  <br>
-  <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button>
-  <br><br>
+  <p>คะแนน: <span id="final"></span></p><br>
+  <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
   <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
 <script>
-let score=0, heart=3, time=10;
-let timer=null, paused=false, correctIndex=0, countdownTimer=null;
-
+let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
 const $ = id => document.getElementById(id);
-
-// ฟังก์ชันปลดล็อกเสียง (สำคัญมาก)
-function unlockAudio() {
-  const bg = $("bgMusic");
-  // ถ้าเพลงยังไม่เล่น ให้สั่งเล่น
-  if (bg.paused) {
-    bg.volume = 0.3; // ความดัง 30%
-    bg.play().catch(() => {});
-  }
-  // ลบแผ่นใสออกเพื่อให้กดปุ่มต่างๆ ได้
-  const unlocker = $("audio-unlocker");
-  if(unlocker) unlocker.remove();
-}
 
 function playSnd(id) {
   const s = $(id);
-  s.currentTime = 0;
-  s.play().catch(() => {});
+  if(s){ s.currentTime = 0; s.play().catch(()=>{}); }
+}
+
+function switchMusic(playId, stopId) {
+  const p = $(playId);
+  const s = $(stopId);
+  if(s){ s.pause(); s.currentTime=0; }
+  if(p){ p.volume=0.5; p.play().catch(()=>{}); }
+}
+
+function unlockAudio() {
+  const bg = $("bgMenu");
+  if (bg.paused) {
+    bg.volume = 0.5;
+    bg.play().catch(()=>{});
+  }
+  const unlocker = $("audio-unlocker");
+  if(unlocker) unlocker.remove();
 }
 
 function showScreen(id){
@@ -255,11 +196,11 @@ function showScreen(id){
 }
 
 function startGame(){
-  unlockAudio(); // ย้ำการเปิดเสียงอีกครั้ง
-  
+  playSnd('sndClick');
   score=0; heart=3; 
   $("score").textContent=score;
   $("heart").textContent=heart;
+  $("bgMenu").pause(); 
   startCountdown();
 }
 
@@ -267,14 +208,13 @@ function startCountdown(){
   showScreen('countdown');
   let c=3;
   $("countNum").textContent=c;
-  playSnd("sndCount"); // เสียงนับ 3
-
+  playSnd('sndClick'); 
   clearInterval(countdownTimer);
   countdownTimer=setInterval(()=>{
     c--;
-    if(c>0) {
-      $("countNum").textContent=c;
-      playSnd("sndCount"); // เสียงนับ 2, 1
+    if(c>0) { 
+      $("countNum").textContent=c; 
+      playSnd('sndClick'); 
     } else { 
       clearInterval(countdownTimer); 
       showGame(); 
@@ -282,32 +222,49 @@ function startCountdown(){
   },1000);
 }
 
-function skipCountdown(){
-  clearInterval(countdownTimer);
-  showGame();
-}
+function skipCountdown(){ clearInterval(countdownTimer); showGame(); }
 
 function showGame(){
   showScreen('game');
+  switchMusic('bgGame', 'bgMenu');
   nextQuestion();
+}
+
+function pauseGame(){ 
+  playSnd('sndClick');
+  paused=true; 
+  $("bgGame").pause(); 
+  showScreen('pause'); 
+}
+
+function resumeGame(){ 
+  playSnd('sndClick');
+  paused=false; 
+  $("bgGame").play(); 
+  showScreen('game'); 
+}
+
+function backMenu(){ 
+  playSnd('sndClick');
+  clearInterval(timer); 
+  switchMusic('bgMenu', 'bgGame'); 
+  showScreen('menu'); 
 }
 
 function nextQuestion(){
   clearInterval(timer);
   time=10;
   $("time").textContent=time;
-
+  
   const ops=["+","-","×","÷"];
   const op=ops[Math.floor(Math.random()*ops.length)];
   let a, b, ans;
-
   if(op==="+"){ a=Math.floor(Math.random()*20)+1; b=Math.floor(Math.random()*20)+1; ans=a+b; }
   else if(op==="-"){ a=Math.floor(Math.random()*20)+10; b=Math.floor(Math.random()*9)+1; ans=a-b; }
   else if(op==="×"){ a=Math.floor(Math.random()*9)+1; b=Math.floor(Math.random()*9)+1; ans=a*b; }
   else { b=Math.floor(Math.random()*9)+1; ans=Math.floor(Math.random()*9)+1; a=b*ans; }
-
+  
   $("question").textContent=`${a} ${op} ${b}`;
-
   let answers=[ans];
   while(answers.length<4){
     let w=ans+(Math.floor(Math.random()*15)-7);
@@ -315,65 +272,43 @@ function nextQuestion(){
   }
   answers.sort(()=>Math.random()-0.5);
   correctIndex=answers.indexOf(ans);
-
   for(let i=0; i<4; i++) $("btn"+i).textContent=answers[i];
 
   timer=setInterval(()=>{
     if(!paused){
       time--;
       $("time").textContent=time;
-      if(time<=0) fail();
+      if(time<=0) { playSnd('sndWrong'); fail(); }
     }
   },1000);
 }
 
 function choose(idx){
   if(idx===correctIndex){
-    playSnd("sndCorrect");
+    playSnd('sndCorrect');
     score+=10;
     $("score").textContent=score;
     nextQuestion();
   } else {
-    playSnd("sndWrong");
+    playSnd('sndWrong');
     fail();
   }
 }
 
 function fail(){
-  playSnd("sndWrong"); // เพิ่มเสียงตรงนี้
   heart--;
   $("heart").textContent=heart;
-  if(heart<=0) {
-    gameOver();
-  } else {
-    nextQuestion();
-  }
+  if(heart<=0) gameOver();
+  else nextQuestion();
 }
 
 function gameOver(){
   clearInterval(timer);
-  playSnd("sndWrong"); // เสียงจบเกม
+  $("bgGame").pause();
+  $("bgGame").currentTime=0;
+  playSnd('sndOver');
   $("final").textContent=score;
   showScreen('over');
-}
-
-function pauseGame(){ 
-  paused=true; 
-  $("bgMusic").pause(); 
-  showScreen('pause'); 
-}
-
-function resumeGame(){ 
-  paused=false; 
-  $("bgMusic").play(); 
-  showScreen('game'); 
-}
-
-function backMenu(){ 
-  clearInterval(timer); 
-  // แก้ไข: ให้กลับหน้าเมนูแล้วเพลงยังเล่นต่อ
-  if($("bgMusic").paused) $("bgMusic").play();
-  showScreen('menu'); 
 }
 </script>
 </body>
