@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Math Block Choice</title>
+<title>Math Block Choice - Perfect Sound</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -13,15 +13,6 @@ body{
   height:100vh;
   overflow:hidden;
   transition:background .3s;
-}
-
-/* แผ่นใสสำหรับดักจับการคลิกครั้งแรกเพื่อเปิดระบบเสียง */
-#audio-unlocker {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0,0,0,0);
-  cursor: pointer;
 }
 
 /* ---------- COMMON ---------- */
@@ -44,7 +35,13 @@ button.primary{
   font-size:20px;
   padding:16px 44px;
   border-radius:20px;
+  transition: transform 0.1s, background 0.2s;
 }
+button.primary:active {
+  transform: scale(0.95);
+  background: #1d4ed8;
+}
+
 .big{font-size:64px;font-weight:800}
 
 /* ---------- MENU DESIGN ---------- */
@@ -72,7 +69,17 @@ button.primary{
 
 .menu-content{ position:relative; z-index:2; text-align:center; padding:20px; }
 .logo{ font-size:56px; font-weight:900; line-height:1.1; margin-bottom:14px; }
-.subtitle{ color:#6b7280; margin-bottom:36px; }
+.subtitle{ color:#6b7280; margin-bottom:20px; }
+
+.highscore-box {
+  background: #f3f4f6;
+  padding: 8px 16px;
+  border-radius: 12px;
+  display: inline-block;
+  margin-bottom: 30px;
+  font-weight: 600;
+  color: #4b5563;
+}
 
 /* ---------- HUD ---------- */
 .hud{
@@ -100,12 +107,22 @@ button.primary{
   border-radius:16px; transition:transform .15s; background:#2563eb;
 }
 .choice:active{transform:scale(.9)}
+
+/* ---------- GAME OVER INFO ---------- */
+.score-info {
+  font-size: 20px;
+  margin: 10px 0 30px;
+  color: #374151;
+}
+.new-record {
+  color: #ea580c;
+  font-weight: bold;
+  display: none;
+}
 </style>
 </head>
 
-<body onclick="unlockAudio()">
-
-<div id="audio-unlocker"></div>
+<body onclick="initAudioContext()">
 
 <audio id="bgMenu" loop src="sound/bg_menu.mp3"></audio>
 <audio id="bgGame" loop src="sound/bg_game.mp3"></audio>
@@ -121,6 +138,12 @@ button.primary{
   <div class="menu-content">
     <h1 class="logo">Math<br>Block<br>Choice</h1>
     <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
+    
+    <div class="highscore-box">
+      🏆 สถิติสูงสุด: <span id="menuHighScore">0</span>
+    </div>
+    <br>
+    
     <button class="primary" onclick="startGame()">เริ่มเกม</button>
   </div>
 </div>
@@ -129,7 +152,7 @@ button.primary{
   <div class="big" id="countNum">3</div>
   <p>เตรียมพร้อม</p>
   <br>
-  <button class="primary" onclick="playSnd('sndClick'); skipCountdown()">ข้าม</button>
+  <button class="primary" onclick="skipCountdown()">ข้าม</button>
 </div>
 
 <div id="game" class="screen">
@@ -159,35 +182,70 @@ button.primary{
 
 <div id="over" class="screen">
   <div class="big">GAME OVER</div>
-  <p>คะแนน: <span id="final"></span></p><br>
+  
+  <div class="score-info">
+    <p>คะแนนของคุณ: <span id="final" style="font-weight:bold; font-size:28px;">0</span></p>
+    <p style="font-size:16px; color:#6b7280; margin-top:5px;">
+      🏆 สถิติสูงสุด: <span id="bestScore">0</span>
+    </p>
+    <p id="newRecordMsg" class="new-record">🎉 ยินดีด้วย! สถิติใหม่ 🎉</p>
+  </div>
+
   <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
   <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
 <script>
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
+let highScore = localStorage.getItem('mathBlockHighScore') || 0;
 const $ = id => document.getElementById(id);
 
-function playSnd(id) {
-  const s = $(id);
-  if(s){ s.currentTime = 0; s.play().catch(()=>{}); }
+$("menuHighScore").textContent = highScore;
+
+// --- ระบบเสียง (Audio System) ---
+
+// ฟังก์ชันเล่นเสียงเอฟเฟกต์ (กดปุ่ม, ถูก, ผิด)
+function playSFX(id) {
+  const audio = $(id);
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+  }
 }
 
-function switchMusic(playId, stopId) {
-  const p = $(playId);
-  const s = $(stopId);
-  if(s){ s.pause(); s.currentTime=0; }
-  if(p){ p.volume=0.5; p.play().catch(()=>{}); }
+// ฟังก์ชันเริ่มเล่นเพลง Background (Loop)
+function playBGM(id) {
+  const audio = $(id);
+  if (audio) {
+    audio.volume = 0.5;
+    audio.play().catch(()=>{});
+  }
 }
 
-function unlockAudio() {
+// ฟังก์ชันหยุดเพลง Background (หยุดและกรอกลับไปที่ 0)
+function stopBGM(id) {
+  const audio = $(id);
+  if (audio) {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+}
+
+// ฟังก์ชันหยุดชั่วคราว (Pause ไม่ต้องกรอกลับ)
+function pauseBGM(id) {
+  const audio = $(id);
+  if (audio) {
+    audio.pause();
+  }
+}
+
+function initAudioContext() {
   const bg = $("bgMenu");
-  if (bg.paused) {
+  // ถ้าอยู่ที่หน้าเมนู และเพลงยังไม่เล่น ให้เล่นเพลงเมนู
+  if (bg && bg.paused && document.getElementById('menu').classList.contains('active')) {
     bg.volume = 0.5;
     bg.play().catch(()=>{});
   }
-  const unlocker = $("audio-unlocker");
-  if(unlocker) unlocker.remove();
 }
 
 function showScreen(id){
@@ -195,12 +253,19 @@ function showScreen(id){
   $(id).classList.add('active');
 }
 
+// --- LOGIC GAME FLOW ---
+
 function startGame(){
-  playSnd('sndClick');
+  playSFX('sndClick');
+  
+  // 1. หยุดเพลงเมนูทันที (เงียบ)
+  stopBGM('bgMenu');
+  stopBGM('bgGame'); // กันเหนียว หยุดเพลงเกมด้วย
+  
   score=0; heart=3; 
   $("score").textContent=score;
   $("heart").textContent=heart;
-  $("bgMenu").pause(); 
+  
   startCountdown();
 }
 
@@ -208,13 +273,14 @@ function startCountdown(){
   showScreen('countdown');
   let c=3;
   $("countNum").textContent=c;
-  playSnd('sndClick'); 
+  playSFX('sndClick'); // เสียงติ๊ด (เงียบเพลง Background)
+  
   clearInterval(countdownTimer);
   countdownTimer=setInterval(()=>{
     c--;
     if(c>0) { 
       $("countNum").textContent=c; 
-      playSnd('sndClick'); 
+      playSFX('sndClick'); 
     } else { 
       clearInterval(countdownTimer); 
       showGame(); 
@@ -222,32 +288,45 @@ function startCountdown(){
   },1000);
 }
 
-function skipCountdown(){ clearInterval(countdownTimer); showGame(); }
+function skipCountdown(){ 
+  playSFX('sndClick');
+  clearInterval(countdownTimer); 
+  showGame(); 
+}
 
 function showGame(){
   showScreen('game');
-  switchMusic('bgGame', 'bgMenu');
+  // 2. เริ่มเพลงเกมตอนเข้าสู่หน้าเล่นเกมเท่านั้น
+  playBGM('bgGame');
   nextQuestion();
 }
 
 function pauseGame(){ 
-  playSnd('sndClick');
+  playSFX('sndClick');
   paused=true; 
-  $("bgGame").pause(); 
+  // 3. กดหยุดเกม -> หยุดเพลงชั่วคราว (Pause)
+  pauseBGM('bgGame');
   showScreen('pause'); 
 }
 
 function resumeGame(){ 
-  playSnd('sndClick');
+  playSFX('sndClick');
   paused=false; 
-  $("bgGame").play(); 
+  // 4. กดเล่นต่อ -> เล่นเพลงต่อ (Resume)
+  const bg = $("bgGame");
+  if(bg) bg.play().catch(()=>{});
   showScreen('game'); 
 }
 
 function backMenu(){ 
-  playSnd('sndClick');
+  playSFX('sndClick');
   clearInterval(timer); 
-  switchMusic('bgMenu', 'bgGame'); 
+  
+  // 5. กลับหน้าหลัก -> หยุดเพลงเกมสนิท -> เล่นเพลงเมนู
+  stopBGM('bgGame');
+  playBGM('bgMenu');
+  
+  $("menuHighScore").textContent = highScore; 
   showScreen('menu'); 
 }
 
@@ -278,19 +357,19 @@ function nextQuestion(){
     if(!paused){
       time--;
       $("time").textContent=time;
-      if(time<=0) { playSnd('sndWrong'); fail(); }
+      if(time<=0) { playSFX('sndWrong'); fail(); }
     }
   },1000);
 }
 
 function choose(idx){
   if(idx===correctIndex){
-    playSnd('sndCorrect');
+    playSFX('sndCorrect');
     score+=10;
     $("score").textContent=score;
     nextQuestion();
   } else {
-    playSnd('sndWrong');
+    playSFX('sndWrong');
     fail();
   }
 }
@@ -304,10 +383,23 @@ function fail(){
 
 function gameOver(){
   clearInterval(timer);
-  $("bgGame").pause();
-  $("bgGame").currentTime=0;
-  playSnd('sndOver');
+  
+  // 6. จบเกม -> หยุดเพลงเกม
+  stopBGM('bgGame');
+  playSFX('sndOver');
+  
   $("final").textContent=score;
+  
+  const newRecordMsg = $("newRecordMsg");
+  if(score > highScore) {
+    highScore = score;
+    localStorage.setItem('mathBlockHighScore', highScore);
+    newRecordMsg.style.display = "block";
+  } else {
+    newRecordMsg.style.display = "none";
+  }
+
+  $("bestScore").textContent = highScore;
   showScreen('over');
 }
 </script>
