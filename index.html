@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Math Block Choice</title>
+<title>Math Block Choice - Sound Edition</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -127,7 +127,6 @@ button.primary{
   margin:30px 0;
 }
 
-/* ✅ Grid 2x2 */
 .choices{
   display:grid;
   grid-template-columns:repeat(2,140px);
@@ -150,6 +149,12 @@ button.primary{
 
 <body>
 
+<audio id="bgMenu" loop src="https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3"></audio>
+<audio id="bgGame" loop src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3"></audio>
+<audio id="sndCount" src="https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3"></audio>
+<audio id="sndCorrect" src="https://assets.mixkit.co/active_storage/sfx/270/270-preview.mp3"></audio>
+<audio id="sndWrong" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
+
 <div id="menu" class="screen active">
   <div class="math-bg">
     <span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span>
@@ -157,7 +162,7 @@ button.primary{
   <div class="menu-content">
     <h1 class="logo">Math<br>Block<br>Choice</h1>
     <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
-    <button class="primary" onclick="startGame()">เริ่มเกม</button>
+    <button class="primary" onclick="initGame()">เข้าสู่เกม</button>
   </div>
 </div>
 
@@ -215,6 +220,13 @@ let timer=null, paused=false, correctIndex=0, countdownTimer=null;
 
 const $ = id => document.getElementById(id);
 
+// ฟังก์ชันเปิดเสียงหน้าแรก (เพราะเบราว์เซอร์บังคับให้ต้องกดก่อนถึงจะเล่นเสียงได้)
+function initGame() {
+  $("bgMenu").volume = 0.5;
+  $("bgMenu").play();
+  startGame();
+}
+
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $(id).classList.add('active');
@@ -224,6 +236,11 @@ function startGame(){
   score=0; heart=3; 
   $("score").textContent=score;
   $("heart").textContent=heart;
+  
+  // จัดการเสียง
+  $("bgMenu").pause();
+  $("bgMenu").currentTime = 0;
+  
   startCountdown();
 }
 
@@ -231,11 +248,22 @@ function startCountdown(){
   showScreen('countdown');
   let c=3;
   $("countNum").textContent=c;
+  
+  // เสียงนับถอยหลังครั้งแรก
+  $("sndCount").currentTime = 0;
+  $("sndCount").play();
+  
   clearInterval(countdownTimer);
   countdownTimer=setInterval(()=>{
     c--;
-    if(c>0) $("countNum").textContent=c;
-    else { clearInterval(countdownTimer); showGame(); }
+    if(c>0) {
+      $("countNum").textContent=c;
+      $("sndCount").currentTime = 0;
+      $("sndCount").play();
+    } else { 
+      clearInterval(countdownTimer); 
+      showGame(); 
+    }
   },1000);
 }
 
@@ -246,6 +274,8 @@ function skipCountdown(){
 
 function showGame(){
   showScreen('game');
+  $("bgGame").volume = 0.4;
+  $("bgGame").play();
   nextQuestion();
 }
 
@@ -286,10 +316,16 @@ function nextQuestion(){
 
 function choose(idx){
   if(idx===correctIndex){
+    // เสียงตอบถูก
+    $("sndCorrect").currentTime = 0;
+    $("sndCorrect").play();
     score+=10;
     $("score").textContent=score;
     nextQuestion();
   } else {
+    // เสียงตอบผิด
+    $("sndWrong").currentTime = 0;
+    $("sndWrong").play();
     fail();
   }
 }
@@ -303,13 +339,32 @@ function fail(){
 
 function gameOver(){
   clearInterval(timer);
+  $("bgGame").pause();
+  $("bgGame").currentTime = 0;
+  $("sndWrong").play(); // เล่นเสียงจบเกม
   $("final").textContent=score;
   showScreen('over');
 }
 
-function pauseGame(){ paused=true; showScreen('pause'); }
-function resumeGame(){ paused=false; showScreen('game'); }
-function backMenu(){ clearInterval(timer); showScreen('menu'); }
+function pauseGame(){ 
+  paused=true; 
+  $("bgGame").pause();
+  showScreen('pause'); 
+}
+
+function resumeGame(){ 
+  paused=false; 
+  $("bgGame").play();
+  showScreen('game'); 
+}
+
+function backMenu(){ 
+  clearInterval(timer); 
+  $("bgGame").pause();
+  $("bgGame").currentTime = 0;
+  $("bgMenu").play();
+  showScreen('menu'); 
+}
 </script>
 </body>
 </html>
