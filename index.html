@@ -76,28 +76,10 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
   width:140px; height:80px; font-size:28px; color:white;
   border-radius:16px; transition:background 0.2s, transform 0.1s; background:#2563eb;
 }
-
-.success-pop {
-  animation: successPop 0.4s ease-out;
-  background-color: #22c55e !important;
-}
-@keyframes successPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
-
-.error-shake {
-  animation: errorShake 0.4s;
-  background-color: #ef4444 !important;
-}
-@keyframes errorShake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-8px); }
-  50% { transform: translateX(8px); }
-  75% { transform: translateX(-8px); }
-}
-
+.success-pop { animation: successPop 0.4s ease-out; background-color: #22c55e !important; }
+@keyframes successPop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+.error-shake { animation: errorShake 0.4s; background-color: #ef4444 !important; }
+@keyframes errorShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); } }
 .score-info { font-size: 20px; margin: 10px 0 30px; color: #374151; }
 .new-record { color: #ea580c; font-weight: bold; display: none; }
 </style>
@@ -107,13 +89,6 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
 <div id="intro-overlay" onclick="handleTapStart()">
   <p>แตะหน้าจอเพื่อเริ่มเกม</p>
 </div>
-
-<audio id="bgMenu" loop preload="auto" src="sound/bg_menu.mp3"></audio>
-<audio id="bgGame" loop preload="auto" src="sound/bg_game.mp3"></audio>
-<audio id="sndClick" preload="auto" src="sound/click.mp3"></audio>
-<audio id="sndCorrect" preload="auto" src="sound/correct.mp3"></audio>
-<audio id="sndWrong" preload="auto" src="sound/wrong.mp3"></audio>
-<audio id="sndOver" preload="auto" src="sound/gameover.mp3"></audio>
 
 <div id="menu" class="screen active menu-screen">
   <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span></div>
@@ -168,38 +143,92 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
 let highScore = localStorage.getItem('mathBlockHighScore') || 0;
 const $ = id => document.getElementById(id);
-
 $("menuHighScore").textContent = highScore;
 
-function handleTapStart() {
-  initAudioContext();
+// --- Web Audio API for iOS Latency ---
+let audioCtx = null;
+let soundBuffers = {};
+let bgSources = { menu: null, game: null };
+
+async function loadSound(name, url) {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  soundBuffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
+}
+
+function playSFX(name) {
+  if (!audioCtx || !soundBuffers[name]) return;
+  const source = audioCtx.createBufferSource();
+  source.buffer = soundBuffers[name];
+  source.connect(audioCtx.destination);
+  source.start(0);
+}
+
+function playBGM(type) {
+  stopAllBGM();
+  if (!audioCtx || !soundBuffers[type]) return;
+  const source = audioCtx.createBufferSource();
+  source.buffer = soundBuffers[type];
+  source.loop = true;
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.value = 0.4;
+  source.connect(gainNode).connect(audioCtx.destination);
+  source.start(0);
+  bgSources[type] = { source, gainNode, startTime: audioCtx.currentTime, pausedAt: 0 };
+}
+
+function stopAllBGM() {
+  for (let key in bgSources) {
+    if (bgSources[key]) {
+      bgSources[key].source.stop();
+      bgSources[key] = null;
+    }
+  }
+}
+
+function pauseBGM(type) {
+  if (bgSources[type]) {
+    bgSources[type].pausedAt = audioCtx.currentTime - bgSources[type].startTime;
+    bgSources[type].source.stop();
+  }
+}
+
+function resumeBGM(type) {
+  if (bgSources[type]) {
+    const prevOffset = bgSources[type].pausedAt;
+    const source = audioCtx.createBufferSource();
+    source.buffer = soundBuffers[type];
+    source.loop = true;
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.4;
+    source.connect(gainNode).connect(audioCtx.destination);
+    source.start(0, prevOffset % soundBuffers[type].duration);
+    bgSources[type] = { source, gainNode, startTime: audioCtx.currentTime - prevOffset, pausedAt: 0 };
+  }
+}
+
+async function handleTapStart() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    await audioCtx.resume();
+  }
+  
+  const sounds = [
+    ['menu', 'sound/bg_menu.mp3'],
+    ['game', 'sound/bg_game.mp3'],
+    ['click', 'sound/click.mp3'],
+    ['correct', 'sound/correct.mp3'],
+    ['wrong', 'sound/wrong.mp3'],
+    ['over', 'sound/gameover.mp3']
+  ];
+
+  await Promise.all(sounds.map(s => loadSound(s[0], s[1])));
+  
   $("intro-overlay").classList.add("hidden");
-  playSFX('sndClick');
-}
-
-function playSFX(id) {
-  const audio = $(id);
-  if (audio) { audio.currentTime = 0; audio.play().catch(()=>{}); }
-}
-
-function playBGM(id) {
-  const audio = $(id);
-  if (audio) { audio.volume = 0.5; audio.play().catch(()=>{}); }
-}
-
-function stopBGM(id) {
-  const audio = $(id);
-  if (audio) { audio.pause(); audio.currentTime = 0; }
-}
-
-function pauseBGM(id) {
-  const audio = $(id);
-  if (audio) { audio.pause(); }
-}
-
-function initAudioContext() {
-  const bg = $("bgMenu");
-  if (bg && bg.paused) { bg.volume = 0.5; bg.play().catch(()=>{}); }
+  playSFX('click');
+  playBGM('menu');
 }
 
 function showScreen(id){
@@ -208,8 +237,8 @@ function showScreen(id){
 }
 
 function startGame(){
-  playSFX('sndClick');
-  stopBGM('bgMenu'); stopBGM('bgGame');
+  playSFX('click');
+  stopAllBGM();
   score=0; heart=3; 
   $("score").textContent=score; $("heart").textContent=heart;
   startCountdown();
@@ -217,41 +246,36 @@ function startGame(){
 
 function startCountdown(){
   showScreen('countdown');
-  let c=3; $("countNum").textContent=c; playSFX('sndClick');
+  let c=3; $("countNum").textContent=c; playSFX('click');
   clearInterval(countdownTimer);
   countdownTimer=setInterval(()=>{
     c--;
-    if(c>0) { $("countNum").textContent=c; playSFX('sndClick'); }
+    if(c>0) { $("countNum").textContent=c; playSFX('click'); }
     else { clearInterval(countdownTimer); showGame(); }
   },1000);
 }
 
-function skipCountdown(){ playSFX('sndClick'); clearInterval(countdownTimer); showGame(); }
+function skipCountdown(){ playSFX('click'); clearInterval(countdownTimer); showGame(); }
 
 function showGame(){
-  showScreen('game'); playBGM('bgGame'); nextQuestion();
+  showScreen('game'); playBGM('game'); nextQuestion();
 }
 
-function pauseGame(){ playSFX('sndClick'); paused=true; pauseBGM('bgGame'); showScreen('pause'); }
+function pauseGame(){ playSFX('click'); paused=true; pauseBGM('game'); showScreen('pause'); }
 
 function resumeGame(){ 
-  playSFX('sndClick'); paused=false; 
-  const bg=$("bgGame"); if(bg) bg.play().catch(()=>{});
-  showScreen('game'); 
+  playSFX('click'); paused=false; resumeBGM('game'); showScreen('game'); 
 }
 
 function backMenu(){ 
-  playSFX('sndClick'); clearInterval(timer); 
-  stopBGM('bgGame'); playBGM('bgMenu');
+  playSFX('click'); clearInterval(timer); stopAllBGM(); playBGM('menu');
   $("menuHighScore").textContent = highScore; showScreen('menu'); 
 }
 
 function nextQuestion(){
   clearInterval(timer);
   time=10; $("time").textContent=time;
-  for(let i=0; i<4; i++) {
-    $("btn"+i).className = 'choice';
-  }
+  for(let i=0; i<4; i++) $("btn"+i).className = 'choice';
   const ops=["+","-","×","÷"];
   const op=ops[Math.floor(Math.random()*ops.length)];
   let a, b, ans;
@@ -271,7 +295,7 @@ function nextQuestion(){
   timer=setInterval(()=>{
     if(!paused){
       time--; $("time").textContent=time;
-      if(time<=0) { playSFX('sndWrong'); fail(null); }
+      if(time<=0) { playSFX('wrong'); fail(null); }
     }
   },1000);
 }
@@ -279,12 +303,12 @@ function nextQuestion(){
 function choose(idx){
   if(paused) return;
   if(idx===correctIndex){
-    playSFX('sndCorrect');
+    playSFX('correct');
     $("btn"+idx).classList.add('success-pop');
     score+=10; $("score").textContent=score;
     setTimeout(nextQuestion, 400);
   } else {
-    playSFX('sndWrong');
+    playSFX('wrong');
     $("btn"+idx).classList.add('error-shake');
     fail(idx);
   }
@@ -292,16 +316,12 @@ function choose(idx){
 
 function fail(idx){
   heart--; $("heart").textContent=heart;
-  if(heart<=0) {
-    setTimeout(gameOver, 400);
-  } else {
-    if(idx !== null) setTimeout(nextQuestion, 400);
-    else nextQuestion();
-  }
+  if(heart<=0) { setTimeout(gameOver, 400); }
+  else { if(idx !== null) setTimeout(nextQuestion, 400); else nextQuestion(); }
 }
 
 function gameOver(){
-  clearInterval(timer); stopBGM('bgGame'); playSFX('sndOver');
+  clearInterval(timer); stopAllBGM(); playSFX('over');
   $("final").textContent=score;
   const newRecordMsg = $("newRecordMsg");
   if(score > highScore) {
