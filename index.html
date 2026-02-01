@@ -82,6 +82,12 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
   width:140px; height:80px; font-size:28px; color:white;
   border-radius:16px; transition:background 0.2s, transform 0.1s; background:#2563eb;
 }
+/* Hover Effect: ปุ่มนูนขึ้น */
+@media(hover: hover) {
+  .choice:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(37,99,235,0.3); }
+  .gold-mode .choice:hover { box-shadow: 0 6px 12px rgba(217,119,6,0.4); }
+}
+
 .success-pop { animation: successPop 0.4s ease-out; background-color: #22c55e !important; }
 @keyframes successPop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 .error-shake { animation: errorShake 0.4s; background-color: #ef4444 !important; }
@@ -149,6 +155,7 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
 <script>
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
 let isBonus=false, bonusCooldown=false, lastQuestionText="";
+let inputLocked = false; // ตัวแปรป้องกันการกดรัว
 let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
 const $ = id => document.getElementById(id);
 $("menuHighScore").textContent = highScore;
@@ -222,12 +229,12 @@ async function handleTapStart() {
   
   const sounds = [
     ['menu', 'sound/bg_menu.mp3'], ['game', 'sound/bg_game.mp3'],
-    ['bonus', 'sound/bonus.mp3'], // เพิ่มเสียงโบนัสถ้ามี
+    ['bonus', 'sound/bonus.mp3'], 
     ['click', 'sound/click.mp3'], ['correct', 'sound/correct.mp3'],
     ['wrong', 'sound/wrong.mp3'], ['over', 'sound/gameover.mp3']
   ];
 
-  await Promise.all(sounds.map(s => loadSound(s[0], s[1]).catch(()=>console.log("No sound file: "+s[1]))));
+  await Promise.all(sounds.map(s => loadSound(s[0], s[1]).catch(()=>console.log("No sound: "+s[1]))));
   $("intro-overlay").classList.add("hidden");
   playSFX('click');
   playBGM('menu');
@@ -289,7 +296,6 @@ function backMenu(){
   showScreen('menu'); 
 }
 
-// Logic คำนวณ
 function calculate(a, op, b) {
   if (op === "+") return a + b;
   if (op === "-") return a - b;
@@ -300,10 +306,13 @@ function calculate(a, op, b) {
 
 function nextQuestion(){
   clearInterval(timer);
+  inputLocked = false; // ปลดล็อคปุ่มสำหรับข้อใหม่
   time=10; $("time").textContent=time;
-  for(let i=0; i<4; i++) $("btn"+i).className = 'choice';
+  for(let i=0; i<4; i++) {
+    $("btn"+i).className = 'choice';
+    $("btn"+i).style.transform = ""; // Reset transform
+  }
 
-  // สุ่มโหมดโบนัส 10% และไม่ติดกัน
   if (heart < 3 && !bonusCooldown && Math.random() < 0.1) {
     isBonus = true; bonusCooldown = true;
     if(soundBuffers['bonus']) playBGM('bonus');
@@ -318,7 +327,6 @@ function nextQuestion(){
   let expr = "", ans = 0;
   
   do {
-    // ระดับความยากตามคะแนน
     let level = isBonus ? 4 : (score >= 300 ? 4 : (score >= 150 ? 3 : 2));
     
     if (level === 2) {
@@ -333,20 +341,43 @@ function nextQuestion(){
     } else if (level === 3) {
       let a=Math.floor(Math.random()*15)+1, b=Math.floor(Math.random()*10)+1, c=Math.floor(Math.random()*10)+1;
       let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)];
-      if (Math.random() > 0.5) {
-        ans = calculate(calculate(a, op1, b), op2, c);
-        expr = `(${a} ${op1} ${b}) ${op2} ${c}`;
+      
+      // สุ่มว่าจะใส่วงเล็บหรือไม่ (50/50)
+      if(Math.random() > 0.5) {
+         // มีวงเล็บ
+         if (Math.random() > 0.5) {
+           ans = calculate(calculate(a, op1, b), op2, c);
+           expr = `(${a} ${op1} ${b}) ${op2} ${c}`;
+         } else {
+           ans = calculate(a, op2, calculate(b, op1, c));
+           expr = `${a} ${op2} (${b} ${op1} ${c})`;
+         }
       } else {
-        ans = calculate(a, op2, calculate(b, op1, c));
-        expr = `${a} ${op2} (${b} ${op1} ${c})`;
+         // ไม่มีวงเล็บ (ท้าทาย)
+         expr = `${a} ${op1} ${b} ${op2} ${c}`;
+         // ใช้ Function เพื่อคำนวณตามหลักคณิตศาสตร์จริง (BODMAS)
+         let safeExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
+         ans = new Function('return ' + safeExpr)();
+         // ปัดเศษกรณีหาร
+         ans = Math.floor(ans); 
       }
     } else {
+      // Level 4
       let a=Math.floor(Math.random()*10)+2, b=Math.floor(Math.random()*10)+2, c=Math.floor(Math.random()*10)+1, d=Math.floor(Math.random()*10)+1;
       let op1=["+","-","×"][Math.floor(Math.random()*3)], op2=["+","-"][Math.floor(Math.random()*2)], op3=["+","-"][Math.floor(Math.random()*2)];
-      ans = calculate(calculate(a, op1, b), op2, calculate(c, op3, d));
-      expr = `(${a} ${op1} ${b}) ${op2} (${c} ${op3} ${d})`;
+      
+      if(Math.random() > 0.5) {
+          ans = calculate(calculate(a, op1, b), op2, calculate(c, op3, d));
+          expr = `(${a} ${op1} ${b}) ${op2} (${c} ${op3} ${d})`;
+      } else {
+          // ไม่มีวงเล็บ
+          expr = `${a} ${op1} ${b} ${op2} ${c} ${op3} ${d}`;
+          let safeExpr = expr.replace(/×/g, "*").replace(/÷/g, "/");
+          ans = new Function('return ' + safeExpr)();
+          ans = Math.floor(ans);
+      }
     }
-  } while (ans < 0 || ans > 500 || expr === lastQuestionText);
+  } while (ans < 0 || ans > 500 || !Number.isInteger(ans) || expr === lastQuestionText);
 
   lastQuestionText = expr;
   $("question").textContent = expr + " = ?";
@@ -369,25 +400,39 @@ function nextQuestion(){
 }
 
 function choose(idx){
-  if(paused) return;
+  // ป้องกันการกดเมื่อ หยุดเกม, ล็อคอินพุต, หรือตายไปแล้ว
+  if(paused || inputLocked || heart <= 0) return;
+  
+  // *** สำคัญ: หยุดเวลาทันทีที่กดเลือก เพื่อแก้บั๊ก 1 วินาที ***
+  clearInterval(timer);
+  inputLocked = true; // ล็อคทันทีกันกดรัว
+
   if(idx===correctIndex){
     playSFX('correct');
     $("btn"+idx).classList.add('success-pop');
     score+=10; $("score").textContent=score;
     if(isBonus) { heart = Math.min(3, heart + 1); $("heart").textContent=heart; }
-    setTimeout(nextQuestion, 400);
+    setTimeout(nextQuestion, 400); // inputLocked จะถูกปลดใน nextQuestion
   } else {
     playSFX('wrong');
     $("btn"+idx).classList.add('error-shake');
-    fail(idx);
+    fail(idx); // ส่งต่อให้ fail จัดการ
   }
 }
 
 function fail(idx){
   if(!isBonus) heart--; 
   $("heart").textContent=heart;
-  if(heart<=0) { setTimeout(gameOver, 400); }
-  else { if(idx !== null) setTimeout(nextQuestion, 400); else nextQuestion(); }
+  
+  if(heart<=0) { 
+    // ถ้าตายแล้ว ไม่ต้องปลดล็อค รอไปหน้า Game Over เลย
+    inputLocked = true;
+    setTimeout(gameOver, 400); 
+  } else { 
+    // ถ้ายังไม่ตาย รออนิเมชั่นแล้วไปข้อต่อไป
+    if(idx !== null) setTimeout(nextQuestion, 400); 
+    else nextQuestion(); 
+  }
 }
 
 function gameOver(){
