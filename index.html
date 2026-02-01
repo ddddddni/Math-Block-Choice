@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Math Block Choice - Sound Edition</title>
+<title>Math Block Choice</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -13,6 +13,15 @@ body{
   height:100vh;
   overflow:hidden;
   transition:background .3s;
+}
+
+/* เพิ่มแผ่นใสสำหรับดักจับการคลิกครั้งแรกเพื่อเปิดเสียง */
+#audio-unlocker {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0);
+  cursor: pointer;
 }
 
 /* ---------- COMMON ---------- */
@@ -147,22 +156,23 @@ button.primary{
 </style>
 </head>
 
-<body>
+<body onclick="unlockAudio()">
 
-<audio id="bgMenu" loop src="https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3"></audio>
-<audio id="bgGame" loop src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3"></audio>
-<audio id="sndCount" src="https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3"></audio>
+<div id="audio-unlocker"></div>
+
+<audio id="bgMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3"></audio>
+<audio id="sndCount" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
 <audio id="sndCorrect" src="https://assets.mixkit.co/active_storage/sfx/270/270-preview.mp3"></audio>
 <audio id="sndWrong" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
 
-<div id="menu" class="screen active">
+<div id="menu" class="screen active menu-screen">
   <div class="math-bg">
     <span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span>
   </div>
   <div class="menu-content">
     <h1 class="logo">Math<br>Block<br>Choice</h1>
     <p class="subtitle">คิดเร็ว • เลือกไว • ฝึกสมอง</p>
-    <button class="primary" onclick="initGame()">เข้าสู่เกม</button>
+    <button class="primary" onclick="startGame()">เริ่มเกม</button>
   </div>
 </div>
 
@@ -220,11 +230,23 @@ let timer=null, paused=false, correctIndex=0, countdownTimer=null;
 
 const $ = id => document.getElementById(id);
 
-// ฟังก์ชันเปิดเสียงหน้าแรก (เพราะเบราว์เซอร์บังคับให้ต้องกดก่อนถึงจะเล่นเสียงได้)
-function initGame() {
-  $("bgMenu").volume = 0.5;
-  $("bgMenu").play();
-  startGame();
+// ฟังก์ชันปลดล็อกเสียง (สำคัญมาก)
+function unlockAudio() {
+  const bg = $("bgMusic");
+  // ถ้าเพลงยังไม่เล่น ให้สั่งเล่น
+  if (bg.paused) {
+    bg.volume = 0.3; // ความดัง 30%
+    bg.play().catch(() => {});
+  }
+  // ลบแผ่นใสออกเพื่อให้กดปุ่มต่างๆ ได้
+  const unlocker = $("audio-unlocker");
+  if(unlocker) unlocker.remove();
+}
+
+function playSnd(id) {
+  const s = $(id);
+  s.currentTime = 0;
+  s.play().catch(() => {});
 }
 
 function showScreen(id){
@@ -233,14 +255,11 @@ function showScreen(id){
 }
 
 function startGame(){
+  unlockAudio(); // ย้ำการเปิดเสียงอีกครั้ง
+  
   score=0; heart=3; 
   $("score").textContent=score;
   $("heart").textContent=heart;
-  
-  // จัดการเสียง
-  $("bgMenu").pause();
-  $("bgMenu").currentTime = 0;
-  
   startCountdown();
 }
 
@@ -248,18 +267,14 @@ function startCountdown(){
   showScreen('countdown');
   let c=3;
   $("countNum").textContent=c;
-  
-  // เสียงนับถอยหลังครั้งแรก
-  $("sndCount").currentTime = 0;
-  $("sndCount").play();
-  
+  playSnd("sndCount"); // เสียงนับ 3
+
   clearInterval(countdownTimer);
   countdownTimer=setInterval(()=>{
     c--;
     if(c>0) {
       $("countNum").textContent=c;
-      $("sndCount").currentTime = 0;
-      $("sndCount").play();
+      playSnd("sndCount"); // เสียงนับ 2, 1
     } else { 
       clearInterval(countdownTimer); 
       showGame(); 
@@ -274,8 +289,6 @@ function skipCountdown(){
 
 function showGame(){
   showScreen('game');
-  $("bgGame").volume = 0.4;
-  $("bgGame").play();
   nextQuestion();
 }
 
@@ -316,53 +329,50 @@ function nextQuestion(){
 
 function choose(idx){
   if(idx===correctIndex){
-    // เสียงตอบถูก
-    $("sndCorrect").currentTime = 0;
-    $("sndCorrect").play();
+    playSnd("sndCorrect");
     score+=10;
     $("score").textContent=score;
     nextQuestion();
   } else {
-    // เสียงตอบผิด
-    $("sndWrong").currentTime = 0;
-    $("sndWrong").play();
+    playSnd("sndWrong");
     fail();
   }
 }
 
 function fail(){
+  playSnd("sndWrong"); // เพิ่มเสียงตรงนี้
   heart--;
   $("heart").textContent=heart;
-  if(heart<=0) gameOver();
-  else nextQuestion();
+  if(heart<=0) {
+    gameOver();
+  } else {
+    nextQuestion();
+  }
 }
 
 function gameOver(){
   clearInterval(timer);
-  $("bgGame").pause();
-  $("bgGame").currentTime = 0;
-  $("sndWrong").play(); // เล่นเสียงจบเกม
+  playSnd("sndWrong"); // เสียงจบเกม
   $("final").textContent=score;
   showScreen('over');
 }
 
 function pauseGame(){ 
   paused=true; 
-  $("bgGame").pause();
+  $("bgMusic").pause(); 
   showScreen('pause'); 
 }
 
 function resumeGame(){ 
   paused=false; 
-  $("bgGame").play();
+  $("bgMusic").play(); 
   showScreen('game'); 
 }
 
 function backMenu(){ 
   clearInterval(timer); 
-  $("bgGame").pause();
-  $("bgGame").currentTime = 0;
-  $("bgMenu").play();
+  // แก้ไข: ให้กลับหน้าเมนูแล้วเพลงยังเล่นต่อ
+  if($("bgMusic").paused) $("bgMusic").play();
   showScreen('menu'); 
 }
 </script>
