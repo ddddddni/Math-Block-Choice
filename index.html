@@ -141,11 +141,10 @@ button.primary:active { transform: scale(0.95); background: #1d4ed8; }
 
 <script>
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
-let highScore = localStorage.getItem('mathBlockHighScore') || 0;
+let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
 const $ = id => document.getElementById(id);
 $("menuHighScore").textContent = highScore;
 
-// --- Web Audio API for iOS Latency ---
 let audioCtx = null;
 let soundBuffers = {};
 let bgSources = { menu: null, game: null };
@@ -180,7 +179,7 @@ function playBGM(type) {
 function stopAllBGM() {
   for (let key in bgSources) {
     if (bgSources[key]) {
-      bgSources[key].source.stop();
+      try { bgSources[key].source.stop(); } catch(e) {}
       bgSources[key] = null;
     }
   }
@@ -189,7 +188,7 @@ function stopAllBGM() {
 function pauseBGM(type) {
   if (bgSources[type]) {
     bgSources[type].pausedAt = audioCtx.currentTime - bgSources[type].startTime;
-    bgSources[type].source.stop();
+    try { bgSources[type].source.stop(); } catch(e) {}
   }
 }
 
@@ -208,24 +207,16 @@ function resumeBGM(type) {
 }
 
 async function handleTapStart() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === 'suspended') {
-    await audioCtx.resume();
-  }
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
   
   const sounds = [
-    ['menu', 'sound/bg_menu.mp3'],
-    ['game', 'sound/bg_game.mp3'],
-    ['click', 'sound/click.mp3'],
-    ['correct', 'sound/correct.mp3'],
-    ['wrong', 'sound/wrong.mp3'],
-    ['over', 'sound/gameover.mp3']
+    ['menu', 'sound/bg_menu.mp3'], ['game', 'sound/bg_game.mp3'],
+    ['click', 'sound/click.mp3'], ['correct', 'sound/correct.mp3'],
+    ['wrong', 'sound/wrong.mp3'], ['over', 'sound/gameover.mp3']
   ];
 
   await Promise.all(sounds.map(s => loadSound(s[0], s[1])));
-  
   $("intro-overlay").classList.add("hidden");
   playSFX('click');
   playBGM('menu');
@@ -234,6 +225,15 @@ async function handleTapStart() {
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $(id).classList.add('active');
+}
+
+function updateHighScore() {
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('mathBlockHighScore', highScore);
+    return true;
+  }
+  return false;
 }
 
 function startGame(){
@@ -258,6 +258,7 @@ function startCountdown(){
 function skipCountdown(){ playSFX('click'); clearInterval(countdownTimer); showGame(); }
 
 function showGame(){
+  paused=false;
   showScreen('game'); playBGM('game'); nextQuestion();
 }
 
@@ -268,8 +269,11 @@ function resumeGame(){
 }
 
 function backMenu(){ 
-  playSFX('click'); clearInterval(timer); stopAllBGM(); playBGM('menu');
-  $("menuHighScore").textContent = highScore; showScreen('menu'); 
+  playSFX('click'); clearInterval(timer);
+  updateHighScore();
+  stopAllBGM(); playBGM('menu');
+  $("menuHighScore").textContent = highScore;
+  showScreen('menu'); 
 }
 
 function nextQuestion(){
@@ -323,12 +327,10 @@ function fail(idx){
 function gameOver(){
   clearInterval(timer); stopAllBGM(); playSFX('over');
   $("final").textContent=score;
-  const newRecordMsg = $("newRecordMsg");
-  if(score > highScore) {
-    highScore = score; localStorage.setItem('mathBlockHighScore', highScore);
-    newRecordMsg.style.display = "block";
-  } else { newRecordMsg.style.display = "none"; }
-  $("bestScore").textContent = highScore; showScreen('over');
+  const isNew = updateHighScore();
+  $("bestScore").textContent = highScore;
+  $("newRecordMsg").style.display = isNew ? "block" : "none";
+  showScreen('over');
 }
 </script>
 </body>
