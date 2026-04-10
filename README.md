@@ -1,2 +1,2 @@
 # Math-Block-Choice
-For is
+For IS
