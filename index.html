@@ -85,7 +85,6 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 .hud-center{font-size:18px;font-weight:700; gap: 5px;}
 .hud-right button{ background:#e5e7eb; padding:6px 12px; border-radius:10px; transition: transform 0.2s; }
 
-/* CSS สำหรับไอคอนรูปภาพ */
 .icon-sm {
     height: 28px; width: auto; 
     vertical-align: middle;
@@ -145,7 +144,6 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 .score-info { font-size: 20px; margin: 10px 0 30px; color: #374151; }
 .new-record { color: #ea580c; font-weight: bold; display: none; }
 
-/* --- Pop-up ประวัติการเล่น --- */
 #history-modal {
   position: fixed; inset: 0; background: rgba(0,0,0,0.5);
   z-index: 10000; display: none; align-items: center; justify-content: center;
@@ -164,7 +162,6 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   border-bottom: 1px solid #f3f4f6; font-size: 14px;
 }
 
-/* ปุ่มประวัติที่มุมขวาบน */
 .history-top-btn {
   position: absolute; 
   top: 50px; 
@@ -275,7 +272,7 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
 let isBonus=false, bonusCooldown=false, lastQuestionText="";
 let inputLocked = false;
-let isGameOver = false; // [แก้บั๊ก] เพิ่มตัวแปรเช็คว่าจบเกมหรือยัง
+let isGameOver = false; 
 let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
 let audioInited = false;
 const $ = id => document.getElementById(id);
@@ -285,7 +282,6 @@ let audioCtx = null;
 let soundBuffers = {};
 let bgSources = { menu: null, game: null, bonus: null };
 
-/* --- ระบบประวัติและจัดการคะแนน --- */
 function saveHistory(s) {
     let h = JSON.parse(localStorage.getItem('mathBlockHistory')) || [];
     const now = new Date();
@@ -324,7 +320,6 @@ function clearHistory() {
     }
 }
 
-/* --- ระบบเสียงและเกม --- */
 async function loadSound(name, url) {
   try {
     const response = await fetch(url);
@@ -434,7 +429,7 @@ function startGame(){
   playSFX('click');
   stopAllBGM();
   score=0; heart=3; isBonus=false; bonusCooldown=false;
-  isGameOver = false; // [แก้บั๊ก] รีเซ็ตสถานะจบเกม
+  isGameOver = false; 
   $("score").textContent=score; $("heart").textContent=heart;
   startCountdown();
 }
@@ -465,12 +460,10 @@ function resumeGame(){
   playSFX('click'); paused=false; resumeBGM(); showScreen('game'); 
 }
 
-/* --- ฟังก์ชันกลับหน้าเมนู พร้อมระบบบันทึกคะแนน --- */
 function backMenu(){ 
   playSFX('click'); 
   clearInterval(timer);
   
-  // [แก้บั๊ก] เช็คเพิ่มว่าถ้า isGameOver เป็น true (คือจบเกมไปแล้ว) ไม่ต้องบันทึกซ้ำ
   if(score > 0 && !isGameOver) {
       saveHistory(score);
       updateHighScore();
@@ -619,7 +612,7 @@ function gameOver(){
   $("newRecordMsg").style.display = isNew ? "block" : "none";
   showScreen('over');
 
-  isGameOver = true; // [แก้บั๊ก] ตั้งสถานะว่าเกมจบแล้ว เพื่อป้องกัน backMenu บันทึกซ้ำ
+  isGameOver = true; 
 }
 
 function initMagneticButtons() {
