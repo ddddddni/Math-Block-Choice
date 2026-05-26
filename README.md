@@ -1,2 +1,2 @@
 # Math-Block-Choice
-For IS
+โครงงาน
