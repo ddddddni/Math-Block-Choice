@@ -179,11 +179,35 @@ io.on('connection', (socket) => {
       const sorted = Object.values(room.players).sort((a,b) => b.score - a.score);
       io.to(code).emit('gameOver', { players: sorted, winner: sorted[0] });
       log(`ห้อง ${code} จบเกม — ชนะ: ${sorted[0]?.name}`);
+      
+      // ✅ รีเซ็ตห้องกลับเป็น waiting หลัง 3 วินาที
+      setTimeout(() => {
+        if (rooms[code]) {
+          rooms[code].status = 'waiting';
+          rooms[code].finishedPlayers = 0;
+          rooms[code].questions = [];
+          for (const id in rooms[code].players) {
+            rooms[code].players[id].score = 0;
+            rooms[code].players[id].heart = 3;
+            rooms[code].players[id].finished = false;
+          }
+          io.to(code).emit('playersUpdated', { players: rooms[code].players, newHost: rooms[code].host });
+          log(`ห้อง ${code} รีเซ็ตกลับเป็น waiting`);
+        }
+      }, 3000);
     }
   });
 
   // ── ออกห้อง ─────────────────────────────────────
   socket.on('leaveRoom', ({ code }) => handleLeave(socket, code));
+
+  // ── กลับห้องรอหลังเกมจบ ────────────────────────
+  socket.on('rejoinRoom', ({ code }) => {
+    const room = rooms[code];
+    if (!room) return socket.emit('roomError', 'ห้องนี้ถูกปิดไปแล้ว');
+    socket.emit('playersUpdated', { players: room.players, newHost: room.host });
+    log(`${room.players[socket.id]?.name || '?'} กลับห้อง ${code}`);
+  });
 
   socket.on('disconnect', () => {
     log(`ตัดการเชื่อมต่อ: ${socket.id}`);

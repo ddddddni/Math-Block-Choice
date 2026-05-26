@@ -314,6 +314,63 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 .btn-back-menu:active { transform:scale(0.97); }
 .summary-not-saved { font-size:12px; color:#9ca3af; text-align:center; display:none; margin-top:-4px; }
 
+/* ── LIVE SCOREBOARD (ระหว่างเล่น) ── */
+#liveBoard {
+  position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
+  border-radius: 16px; padding: 8px 14px; z-index: 20;
+  min-width: 180px; max-width: 340px; width: 90%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  display: none; flex-direction: column; gap: 4px;
+}
+.lb-live-item {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; font-weight: 700; color: #374151;
+  padding: 4px 6px; border-radius: 8px;
+}
+.lb-live-item.me { background: #eff6ff; color: #1d4ed8; }
+.lb-live-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lb-live-score { font-size:14px; font-weight:900; color:#2563eb; margin-left:8px; }
+.lb-live-heart { font-size:11px; color:#ef4444; margin-left:4px; }
+
+/* ── SETTINGS MODAL ── */
+.settings-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid #f3f4f6; }
+.settings-label { font-size:15px; font-weight:600; color:#374151; }
+.settings-sub { font-size:12px; color:#9ca3af; margin-top:2px; }
+.toggle-wrap { position:relative; width:48px; height:26px; flex-shrink:0; }
+.toggle-wrap input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:#d1d5db; border-radius:26px; cursor:pointer; transition:.3s; }
+.toggle-slider:before { content:''; position:absolute; height:20px; width:20px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+.toggle-wrap input:checked + .toggle-slider { background:#2563eb; }
+.toggle-wrap input:checked + .toggle-slider:before { transform:translateX(22px); }
+.settings-btn { position:absolute; top:16px; left:16px; z-index:50; background:#f3f4f6; border:none; border-radius:50%; width:38px; height:38px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.settings-btn:active { transform:scale(0.9); }
+
+/* ── MULTI RESULT SCREEN ── */
+#multiResult { background:#f9fafb; overflow-y:auto; justify-content:flex-start; align-items:center; }
+.multi-result-wrap { width:92%; max-width:440px; padding:20px 0 40px; display:flex; flex-direction:column; gap:12px; }
+.mr-header { text-align:center; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:white; border-radius:20px; padding:22px 16px 18px; }
+.mr-title { font-size:24px; font-weight:900; }
+.mr-sub { font-size:13px; opacity:0.8; margin-top:4px; }
+.mr-player-card { background:white; border-radius:16px; padding:14px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.07); display:flex; align-items:center; gap:12px; }
+.mr-player-card.rank1 { border:2px solid #fbbf24; background:#fffbeb; }
+.mr-player-card.rank2 { border:2px solid #9ca3af; }
+.mr-player-card.rank3 { border:2px solid #cd7c2f; }
+.mr-rank { font-size:28px; width:36px; text-align:center; flex-shrink:0; }
+.mr-info { flex:1; }
+.mr-name { font-size:15px; font-weight:700; color:#111827; }
+.mr-detail { font-size:12px; color:#6b7280; margin-top:2px; }
+.mr-score { font-size:22px; font-weight:900; color:#2563eb; }
+.mr-my-answers { background:white; border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+.mr-my-title { font-size:14px; font-weight:700; color:#374151; margin-bottom:10px; }
+.mr-q-row { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid #f3f4f6; font-size:13px; }
+.mr-q-row:last-child { border-bottom:none; }
+.mr-q-icon { font-size:16px; width:20px; text-align:center; flex-shrink:0; }
+.mr-q-text { flex:1; color:#374151; }
+.mr-q-ans { font-weight:700; }
+.mr-q-ans.ok { color:#16a34a; }
+.mr-q-ans.bad { color:#ef4444; }
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -330,6 +387,8 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
     <div class="account-avatar-sm" id="avatarSm"><span>?</span></div>
     <span id="accountLabel">เข้าสู่ระบบ</span>
   </button>
+  <!-- ปุ่ม settings -->
+  <button class="settings-btn" onclick="openSettings()" style="top:16px;left:auto;right:60px;" title="ตั้งค่า">⚙️</button>
   <div class="lb-top-btn" onclick="openLeaderboard()">
     <img src="images/trophy.png" alt="อันดับ">
     <span>อันดับ</span>
@@ -362,6 +421,47 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   </div>
 </div>
 
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal" onclick="closeOutside(event,'settingsModal')">
+  <div class="modal-box">
+    <div class="modal-title">⚙️ ตั้งค่าเสียง</div>
+    <div class="modal-scroll">
+      <div class="settings-row">
+        <div><div class="settings-label">🎵 เพลงพื้นหลัง</div><div class="settings-sub">BGM ระหว่างเล่นและเมนู</div></div>
+        <label class="toggle-wrap"><input type="checkbox" id="togBGM" checked onchange="applySettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">🔊 เสียงปุ่มกด</div><div class="settings-sub">เสียงเมื่อกดปุ่มต่างๆ</div></div>
+        <label class="toggle-wrap"><input type="checkbox" id="togClick" checked onchange="applySettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row" style="border-bottom:none">
+        <div><div class="settings-label">✅ เสียงตอบถูก/ผิด</div><div class="settings-sub">เสียง feedback คำตอบ</div></div>
+        <label class="toggle-wrap"><input type="checkbox" id="togSFX" checked onchange="applySettings()"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <button class="btn-close-modal" onclick="closeModal('settingsModal')">ปิด</button>
+  </div>
+</div>
+
+<!-- MULTI RESULT SCREEN -->
+<div id="multiResult" class="screen">
+  <div class="multi-result-wrap">
+    <div class="mr-header">
+      <div class="mr-title" id="mrTitle">🏆 ผลการแข่งขัน</div>
+      <div class="mr-sub" id="mrSub">ผลคะแนนทั้งหมด</div>
+    </div>
+    <div id="mrRankList"></div>
+    <div class="mr-my-answers" id="mrMyAnswers" style="display:none">
+      <div class="mr-my-title">📋 ผลของคุณ (เห็นเฉพาะตัวเอง)</div>
+      <div id="mrQList"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+      <button class="btn-play-again" onclick="returnToWaitingRoom()">🔄 กลับห้องรอ</button>
+      <button class="btn-back-menu" onclick="multiResultBackMenu()">🏠 กลับหน้าหลัก</button>
+    </div>
+  </div>
+</div>
+
 <div id="countdown" class="screen">
   <div class="big" id="countNum">3</div><p>เตรียมพร้อม</p><br>
   <button class="primary" onclick="skipCountdown()">ข้าม</button>
@@ -386,6 +486,9 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
         <button onclick="pauseGame()">หยุด</button>
     </div>
   </div>
+
+  <!-- Live Scoreboard -->
+  <div id="liveBoard"></div>
 
   <div class="game" id="gameContainer">
     <div id="bonusLabel" class="bonus-label">✨ BONUS: รับหัวใจคืน! ✨</div>
@@ -511,23 +614,39 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
             <input type="number" id="customQInput" placeholder="ระบุจำนวนข้อ เช่น 15, 50" min="1" max="100" style="width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 16px; outline: none; text-align: center;">
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button class="primary" style="flex: 1; font-size: 16px; padding: 12px; border-radius: 14px;" onclick="alert('กำลังสร้างห้อง 1v1...')">ดวล 1v1</button>
-            <button class="primary" style="flex: 1; font-size: 16px; padding: 12px; background: #10b981; border-radius: 14px;" onclick="alert('กำลังสร้างห้องเล่นกลุ่ม...')">เล่นกลุ่ม</button>
-        </div>
+       <div style="display: flex; gap: 10px; margin-top: 10px;">
+    <button class="primary" style="flex: 1; font-size: 16px; padding: 12px; border-radius: 14px;" onclick="createRoom()">ดวล 1v1</button>
+    <button class="primary" style="flex: 1; font-size: 16px; padding: 12px; background: #10b981; border-radius: 14px;" onclick="createRoom()">เล่นกลุ่ม</button>
+</div>
     </div>
 
     <div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
         <h3 style="margin-bottom: 12px; color: #374151; font-size: 18px;">🔑 เข้าห้องด้วยรหัส</h3>
         <div style="display: flex; gap: 10px;">
             <input type="text" id="roomCodeInput" placeholder="รหัส 4 หลัก" maxlength="4" style="flex: 1; padding: 12px; border-radius: 14px; border: 2px solid #e5e7eb; font-size: 20px; text-align: center; letter-spacing: 5px; font-weight: bold; outline: none;">
-            <button class="primary" style="background: #f59e0b; padding: 12px 20px; font-size: 16px; border-radius: 14px;" onclick="alert('กำลังค้นหาห้อง...')">เข้าห้อง</button>
+            <button class="primary" style="background: #f59e0b; padding: 12px 20px; font-size: 16px; border-radius: 14px;" onclick="joinRoom()">เข้าห้อง</button>
         </div>
     </div>
 
     <button class="primary" style="background: #8b5cf6; font-size: 18px; padding: 15px; border-radius: 16px; box-shadow: 0 4px 10px rgba(139,92,246,0.3);" onclick="startGame()">🤖 ซ้อมแข่งกับ Bot AI</button>
     
     <button onclick="backToMenuFromLobby()" style="background: #e5e7eb; color: #4b5563; padding: 14px; border-radius: 16px; font-weight: bold; font-size: 16px; margin-top: 5px;">กลับหน้าแรก</button>
+  </div>
+</div>
+<div id="waitingRoom" class="screen">
+  <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span></div>
+  <h2 class="logo" style="font-size: 40px; color: #111827; margin-top: 20px;">ห้องพักคอย</h2>
+  <div style="background: rgba(255,255,255,0.9); padding: 24px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; z-index: 2; display: flex; flex-direction: column; gap: 15px;">
+    <p style="font-size: 16px; font-weight: bold; color: #4b5563;">รหัสผ่านเข้าห้อง</p>
+    <h1 id="waitingRoomCode" style="font-size: 54px; font-weight: 900; color: #2563eb; letter-spacing: 2px;">----</h1>
+    <div style="border-top: 2px dashed #e5e7eb; margin: 10px 0;"></div>
+    <p style="font-size: 14px; font-weight: bold; color: #6b7280; text-align: left;">ผู้เล่นในห้องทั้งหมด:</p>
+    <div id="waitingPlayerList" style="display: flex; flex-direction: column; gap: 8px; text-align: left; max-height: 180px; overflow-y: auto;"></div>
+    
+    <button id="hostStartBtn" class="primary" style="background: #10b981; width: 100%; display: none; margin-top: 10px;" onclick="hostStartGame()">🏁 เริ่มเกมแข่งขัน</button>
+    <p id="clientWaitMsg" style="font-size: 14px; color: #9ca3af; font-weight: 600; display: none; margin-top: 10px; animation: pulseText 2s infinite;">⏳ รอหัวหน้าห้องกดเริ่มเกม...</p>
+    
+    <button onclick="leaveWaitingRoom()" style="background: #fee2e2; color: #ef4444; padding: 14px; border-radius: 16px; font-weight: bold; font-size: 16px; border: none; cursor: pointer;">🚪 ออกจากห้อง</button>
   </div>
 </div>
 
@@ -560,6 +679,77 @@ const socket = io(SERVER_URL);
 
 socket.on('connect', () => console.log('เชื่อมต่อ server สำเร็จแล้ว!'));
 socket.on('error', (msg) => alert('❌ เกิดข้อผิดพลาด: ' + msg));
+// --- ระบบสร้างห้องและเข้าห้อง ---
+window.createRoom = function() {
+  if (typeof playSFX === 'function') playSFX('click');
+  const name = window._displayName || 'ผู้เล่น';
+  socket.emit('createRoom', {
+    playerName: name,
+    difficulty: document.getElementById('difficulty').value,
+    maxQ: parseInt(document.getElementById('qCountSetting').value) || 10
+  });
+};
+
+window.joinRoom = function() {
+  if (typeof playSFX === 'function') playSFX('click');
+  const code = document.getElementById('roomCodeInput').value.toUpperCase();
+  const name = window._displayName || 'ผู้เล่น';
+  if (!code) return alert('กรุณากรอกรหัสห้อง');
+  socket.emit('joinRoom', { code, playerName: name });
+};
+
+socket.on('playerJoined', ({ players }) => {
+  renderWaitingPlayers(players);
+});
+
+socket.on('playersUpdated', ({ players, newHost }) => {
+  if (newHost) window.isRoomHost = (socket.id === newHost);
+  renderWaitingPlayers(players);
+});
+
+// --- ฟังก์ชันอัปเดตหน้าจอห้องรอ ---
+window.showWaitingRoom = function(code, room) {
+  document.getElementById('waitingRoomCode').textContent = code;
+  renderWaitingPlayers(room.players);
+  showScreen('waitingRoom'); // สั่งให้ UI สลับหน้าจอ
+};
+
+window.renderWaitingPlayers = function(players) {
+  const container = document.getElementById('waitingPlayerList');
+  if(!container) return;
+  container.innerHTML = '';
+  for (let id in players) {
+    const p = players[id];
+    container.innerHTML += `<div style="padding:10px 14px; background:#f3f4f6; border-radius:12px; font-weight:700; color:#374151; display:flex; justify-content:space-between; align-items:center;">
+      <span>👤 ${p.name}${id === socket.id ? ' (คุณ)' : ''}</span> <span style="font-size:12px; color:#10b981; font-weight:bold;">🟢 พร้อมแข่ง</span>
+    </div>`;
+  }
+  const hostBtn = document.getElementById('hostStartBtn');
+  const waitMsg = document.getElementById('clientWaitMsg');
+  if (window.isRoomHost) {
+    if (hostBtn) hostBtn.style.display = 'block';
+    if (waitMsg) waitMsg.style.display = 'none';
+  } else {
+    if (hostBtn) hostBtn.style.display = 'none';
+    if (waitMsg) waitMsg.style.display = 'block';
+  }
+};
+
+window.leaveWaitingRoom = function() {
+  if (typeof playSFX === 'function') playSFX('click');
+  if (window.currentRoomCode) {
+    socket.emit('leaveRoom', { code: window.currentRoomCode });
+    window.currentRoomCode = null;
+  }
+  showScreen('lobby');
+};
+
+window.hostStartGame = function() {
+  if (typeof playSFX === 'function') playSFX('click');
+  if (window.currentRoomCode) {
+    socket.emit('startGame', { code: window.currentRoomCode });
+  }
+};
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null, combo=0, currentQuestion=0, maxQuestions=10, isUnlimited=false;
 let statCorrectCount=0, statWrongCount=0, statBonusCount=0, statMaxCombo=0, gameStartTime=0, statTimeUsed=0;
 let isBonus=false, bonusCooldown=false, lastQuestionText="";
@@ -668,6 +858,91 @@ async function loadSound(name, url) {
     soundBuffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
   } catch(e) { console.log("Sound error:", name); }
 }
+
+// สร้างห้อง
+function createRoom(mode) {
+  const name = window._displayName || 'ผู้เล่น';
+  socket.emit('createRoom', {
+    playerName: name,
+    difficulty: document.getElementById('difficulty').value,
+    maxQ: parseInt(document.getElementById('qCountSetting').value) || 10
+  });
+}
+
+// รับรหัสห้องกลับมา
+socket.on('roomCreated', ({ code, room }) => {
+  window.currentRoomCode = code;
+  window.isRoomHost = true;   // ✅ ต้องตั้งก่อน showWaitingRoom
+  showWaitingRoom(code, room);
+});
+
+// เข้าห้อง
+function joinRoom() {
+  const code = document.getElementById('roomCodeInput').value.toUpperCase();
+  const name = window._displayName || 'ผู้เล่น';
+  socket.emit('joinRoom', { code, playerName: name });
+}
+
+socket.on('roomJoined', ({ code, room }) => {
+  window.currentRoomCode = code;
+  window.isRoomHost = false;  // ✅ ต้องตั้งก่อน showWaitingRoom
+  showWaitingRoom(code, room);
+});
+
+// รับสัญญาณเริ่มเกมจาก server (ทุกคนพร้อมกัน)
+socket.on('gameStarted', ({ questions, totalQ }) => {
+  window.multiQuestions = questions;
+  window.multiTotalQ    = totalQ;
+  startMultiGame();
+});
+function startMultiGame() {
+  playSFX('click');
+  stopAllBGM();
+
+  window.isMultiplayer = true;
+  myAnswerLog = [];   // reset คำตอบ
+
+  score = 0; heart = 3; combo = 0;
+  isBonus = false; bonusCooldown = false;
+  isGameOver = false; inputLocked = false;
+  statCorrectCount = 0; statWrongCount = 0; statBonusCount = 0; statMaxCombo = 0;
+  gameStartTime = Date.now(); statTimeUsed = 0;
+  isUnlimited = false;
+
+  currentQuestion = 1;
+  maxQuestions = window.multiTotalQ || 10;
+
+  $("score").textContent = score;
+  $("heart").textContent = heart;
+  $("qMax").textContent = maxQuestions;
+  $("qCount").textContent = currentQuestion;
+
+  // เปิด live board (จะถูก populate เมื่อรับ scoreUpdate)
+  livePlayers[socket.id] = { name: window._displayName||'คุณ', score: 0, heart: 3 };
+  renderLiveScoreboard(livePlayers);
+  showLiveBoard(true);
+
+  startCountdown();
+}
+
+function loadMultiQuestion() {
+  // ฟังก์ชันนี้ไม่ถูกใช้แล้ว — ใช้ nextQuestion() แทน
+}
+
+// ส่งคำตอบไป server
+function submitMultiAnswer(isCorrect) {
+  socket.emit('submitAnswer', {
+    code: window.currentRoomCode,
+    qIndex: currentQuestion - 1,
+    isCorrect,
+    heartsLeft: heart
+  });
+}
+
+// รับคะแนน live จากคนอื่น
+socket.on('scoreUpdate', ({ players }) => {
+  renderLiveScoreboard(players);  // แสดงคะแนนทุกคนแบบ real-time
+});
 
 function playSFX(name) {
   if (!audioCtx || !soundBuffers[name]) return;
@@ -783,10 +1058,10 @@ function startGame(){
   stopAllBGM();
   score=0; heart=3; isBonus=false; bonusCooldown=false;
   isGameOver = false;
+  window.isMultiplayer = false;  // reset ให้เป็นโหมดเดี่ยวเสมอ
   statCorrectCount=0; statWrongCount=0; statBonusCount=0; statMaxCombo=0;
   gameStartTime = Date.now(); statTimeUsed=0;
   $("score").textContent=score; $("heart").textContent=heart;
-  startCountdown();
   combo = 0;
  // --- ระบบตั้งค่าจำนวนข้อจากล็อบบี้ ---
   const qSetting = $("qCountSetting").value;
@@ -798,9 +1073,7 @@ function startGame(){
   } else if (qSetting === "custom") {
       isUnlimited = false;
       let customVal = parseInt($("customQInput").value);
-      if (isNaN(customVal) || customVal <= 0) {
-          customVal = 10; 
-      }
+      if (isNaN(customVal) || customVal <= 0) customVal = 10; 
       maxQuestions = customVal;
       $("qMax").textContent = maxQuestions;
   } else {
@@ -811,6 +1084,7 @@ function startGame(){
   
   currentQuestion = 1;
   $("qCount").textContent = currentQuestion;
+  startCountdown();
 }
 
 function startCountdown(){
@@ -878,6 +1152,25 @@ function nextQuestion() {
     btn.style.transition = ""; 
   }
 
+  // ── โหมด multiplayer: ใช้โจทย์จาก server ──
+  if (window.isMultiplayer && window.multiQuestions) {
+    const qIdx = currentQuestion - 1;
+    if (qIdx >= window.multiQuestions.length) { gameOver(); return; }
+    const mq = window.multiQuestions[qIdx];
+    $("gameContainer").className = "game";
+    $("bonusLabel").style.display = "none";
+    $("question").textContent = mq.text + " = ?";
+    const wrongs = mq.choices.filter(c => c !== mq.answer);
+    let answers = [...wrongs, mq.answer].sort(() => Math.random() - 0.5);
+    correctIndex = answers.indexOf(mq.answer);
+    for(let i=0;i<4;i++) $("btn"+i).textContent = answers[i];
+    timer = setInterval(() => {
+      if(!paused){ time--; $("time").textContent=time; if(time<=0){playSFX('wrong');fail(null);} }
+    }, 1000);
+    return;
+  }
+
+  // ── โหมดเดี่ยว: bonus / BGM ──
   if (heart < 3 && !bonusCooldown && Math.random() < 0.1) {
     isBonus = true; bonusCooldown = true;
     if(soundBuffers['bonus']) playBGM('bonus');
@@ -968,6 +1261,16 @@ function choose(idx){
   clearInterval(timer);
   inputLocked = true;
   
+  // track คำตอบ (ออนไลน์)
+  if (window.isMultiplayer && window.multiQuestions) {
+    const qIdx = currentQuestion - 1;
+    const mq = window.multiQuestions[qIdx];
+    if (mq) {
+      const chosenVal = parseInt($("btn"+idx).textContent);
+      myAnswerLog.push({ q: mq.text, correct: idx===correctIndex, myAns: chosenVal, rightAns: mq.answer });
+    }
+  }
+
   if(idx===correctIndex){ 
     playSFX('correct');
     $("btn"+idx).classList.add('success-pop');
@@ -980,6 +1283,8 @@ function choose(idx){
         $("comboCount").textContent = combo;
     }
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+    if (window.isMultiplayer) { submitMultiAnswer(true); updateMyLiveScore(); }
 
     currentQuestion++;
     if (isUnlimited) {
@@ -998,6 +1303,8 @@ function choose(idx){
     
     combo = 0; statWrongCount++;
     $("comboDisplay").style.display = "none";
+
+    if (window.isMultiplayer) { submitMultiAnswer(false); updateMyLiveScore(); }
 
     currentQuestion++;
     if (isUnlimited) {
@@ -1025,17 +1332,21 @@ function fail(idx){
 
 
 function formatTime(ms) {
-  const s = Math.floor(ms / 1000);
-  if (s < 60) return s + 'วิ';
-  return Math.floor(s/60) + 'น ' + (s%60) + 'วิ';
+  const totalSec = ms / 1000;
+  if (totalSec < 60) return totalSec.toFixed(2) + ' วิ';
+  const m = Math.floor(totalSec / 60);
+  const s = (totalSec % 60).toFixed(2);
+  return m + ' น ' + s + ' วิ';
 }
 
 function showSummary(type) {
   // type: 'win' | 'lose' | 'quit'
   statTimeUsed = Date.now() - gameStartTime;
 
+  // ✅ กำหนด title/sub แยกตามว่าออนไลน์หรือเดี่ยว
+  const isMP = !!window.isMultiplayer;
   const cfg = {
-    win:  { cls:'win',  emoji:'🏆', title:'ชนะ!',        sub:'ทำได้ยอดเยี่ยมมาก!' },
+    win:  { cls:'win',  emoji:'🏆', title: isMP ? 'จบแล้ว!' : 'ชนะ!',       sub: isMP ? 'รอดูผลรวมของทุกคน!' : 'ทำได้ยอดเยี่ยมมาก!' },
     lose: { cls:'lose', emoji:'💀', title:'Game Over',    sub:'สู้ต่อไปนะ ลองอีกครั้ง!' },
     quit: { cls:'quit', emoji:'🚪', title:'ออกจากเกม',   sub:'คะแนนของคุณถึงตอนนี้' },
   };
@@ -1048,30 +1359,58 @@ function showSummary(type) {
   $('summarySub').textContent    = c.sub;
 
   $('summaryScore').textContent  = score;
-  const isNew = updateHighScore();
-  $('summaryBest').textContent   = highScore;
+  const isNew = !isMP && updateHighScore();
+  $('summaryBest').textContent   = isMP ? '-' : highScore;
   $('summaryNewRecord').style.display = isNew ? 'block' : 'none';
 
   $('statCorrect').textContent   = statCorrectCount;
   $('statWrong').textContent     = statWrongCount;
-  $('statBonus').textContent     = statBonusCount;
+  $('statBonus').textContent     = isMP ? '-' : statBonusCount;
   $('statCombo').textContent     = statMaxCombo + 'x';
   $('statTime').textContent      = formatTime(statTimeUsed);
   $('statHearts').textContent    = heart + ' / 3';
 
-  if (window._user) {
+  // ✅ เปลี่ยนปุ่ม "เล่นอีกครั้ง" ตามโหมด
+  const btnPlayAgain = document.querySelector('.btn-play-again');
+  if (isMP) {
+    btnPlayAgain.textContent = '🔄 กลับห้องรอ';
+    btnPlayAgain.onclick = returnToWaitingRoom;
+  } else {
+    btnPlayAgain.textContent = '🔄 เล่นอีกครั้ง';
+    btnPlayAgain.onclick = startGame;
+  }
+
+  if (!isMP && window._user) {
     $('summaryNotSaved').style.display = 'none';
     saveScoreOnline(score);
-  } else {
+  } else if (!isMP) {
     $('summaryNotSaved').style.display = 'block';
+  } else {
+    $('summaryNotSaved').style.display = 'none';
   }
 
   showScreen('summary');
 }
 
+// ✅ กลับห้องรอหลังเล่นออนไลน์จบ
+function returnToWaitingRoom() {
+  playSFX('click');
+  stopAllBGM();
+  playBGM('menu');
+  window.isMultiplayer = false;
+  if (window.currentRoomCode) {
+    showScreen('waitingRoom');
+    // ขอสถานะห้องใหม่จาก server
+    socket.emit('rejoinRoom', { code: window.currentRoomCode });
+  } else {
+    showScreen('lobby');
+  }
+}
+
 function goBackMenuFromSummary() {
   playSFX('click');
   stopAllBGM(); playBGM('menu');
+  window.isMultiplayer = false;
   $('menuHighScore').textContent = highScore;
   showScreen('menu');
 }
@@ -1080,7 +1419,17 @@ function gameOver(){
   clearInterval(timer); stopAllBGM();
   isGameOver = true; inputLocked = false;
 
-  if (heart > 0) {
+  if (window.isMultiplayer && window.currentRoomCode) {
+    const reason = heart > 0 ? 'finished' : 'dead';
+    socket.emit('playerFinished', {
+      code: window.currentRoomCode,
+      finalScore: score,
+      reason
+    });
+  }
+
+  // unlimited = จบเกมได้แค่ตอนหัวใจหมดเสมอ → lose
+  if (heart > 0 && !isUnlimited) {
     playSFX('correct');
     confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
     setTimeout(() => confetti({ particleCount: 100, spread: 100, origin: { y: 0.5 } }), 300);
@@ -1090,6 +1439,167 @@ function gameOver(){
     showSummary('lose');
   }
 }
+// ═══════════════════════════════════════════
+// ⚙️ SETTINGS (เสียง)
+// ═══════════════════════════════════════════
+const soundSettings = { bgm: true, click: true, sfx: true };
+(function loadSettings() {
+  try { Object.assign(soundSettings, JSON.parse(localStorage.getItem('mathBlockSoundSettings') || '{}')); } catch(e) {}
+})();
+
+function openSettings() {
+  const _c = playSFX; playSFX = _origPlaySFX || _c; playSFX('click');
+  document.getElementById('togBGM').checked   = soundSettings.bgm;
+  document.getElementById('togClick').checked = soundSettings.click;
+  document.getElementById('togSFX').checked   = soundSettings.sfx;
+  document.getElementById('settingsModal').classList.add('open');
+}
+function applySettings() {
+  soundSettings.bgm   = document.getElementById('togBGM').checked;
+  soundSettings.click = document.getElementById('togClick').checked;
+  soundSettings.sfx   = document.getElementById('togSFX').checked;
+  localStorage.setItem('mathBlockSoundSettings', JSON.stringify(soundSettings));
+  if (!soundSettings.bgm) stopAllBGM();
+}
+// wrap playSFX/playBGM หลัง define
+const _origPlaySFX = playSFX;
+const _origPlayBGM = playBGM;
+playSFX = function(name) {
+  if (name === 'click' && !soundSettings.click) return;
+  if ((name==='correct'||name==='wrong'||name==='over') && !soundSettings.sfx) return;
+  _origPlaySFX(name);
+};
+playBGM = function(type) {
+  if (!soundSettings.bgm) return;
+  _origPlayBGM(type);
+};
+
+// ═══════════════════════════════════════════
+// 🏃 LIVE SCOREBOARD
+// ═══════════════════════════════════════════
+let livePlayers = {};
+let botIntervals = [];
+
+function showLiveBoard(visible) {
+  const lb = document.getElementById('liveBoard');
+  if (lb) lb.style.display = visible ? 'flex' : 'none';
+}
+
+function renderLiveScoreboard(players) {
+  livePlayers = players;
+  const lb = document.getElementById('liveBoard');
+  if (!lb) return;
+  lb.style.display = 'flex';
+  const sorted = Object.entries(players).sort((a,b) => b[1].score - a[1].score);
+  lb.innerHTML = sorted.map(([id, p]) => {
+    const isMe = id === socket.id || id === 'you';
+    const hearts = '❤️'.repeat(Math.max(0, p.heart||0));
+    return `<div class="lb-live-item${isMe?' me':''}">
+      <span class="lb-live-name">${isMe?'👤 ':''} ${p.name}</span>
+      <span class="lb-live-heart">${hearts}</span>
+      <span class="lb-live-score">${p.score}</span>
+    </div>`;
+  }).join('');
+}
+
+function startBotSimulation(botName) {
+  stopBotSimulation();
+  const botId = 'bot_1';
+  livePlayers['you'] = { name: window._displayName||'คุณ', score: 0, heart: 3 };
+  livePlayers[botId] = { name: botName||'🤖 Bot', score: 0, heart: 3 };
+  renderLiveScoreboard(livePlayers);
+  showLiveBoard(true);
+  let botQ = 0;
+  const doTick = () => {
+    if (isGameOver || !livePlayers[botId] || livePlayers[botId].heart<=0 || botQ>=maxQuestions) return;
+    if (Math.random() < 0.72) livePlayers[botId].score += 10;
+    else livePlayers[botId].heart = Math.max(0, livePlayers[botId].heart - 1);
+    botQ++;
+    renderLiveScoreboard(livePlayers);
+    if (!isGameOver && livePlayers[botId].heart>0 && botQ<maxQuestions) {
+      botIntervals.push(setTimeout(doTick, 1800 + Math.random()*4000));
+    }
+  };
+  botIntervals.push(setTimeout(doTick, 2000 + Math.random()*3000));
+}
+
+function stopBotSimulation() {
+  botIntervals.forEach(t => clearTimeout(t));
+  botIntervals = [];
+  livePlayers = {};
+  showLiveBoard(false);
+}
+
+// อัปเดต live board ของตัวเองตอนออนไลน์
+function updateMyLiveScore() {
+  if (!window.isMultiplayer) return;
+  if (!livePlayers[socket.id]) livePlayers[socket.id] = { name: window._displayName||'คุณ', score: 0, heart: 3 };
+  livePlayers[socket.id].score = score;
+  livePlayers[socket.id].heart = heart;
+  renderLiveScoreboard(livePlayers);
+}
+
+// ═══════════════════════════════════════════
+// 📋 TRACK คำตอบ
+// ═══════════════════════════════════════════
+let myAnswerLog = [];
+
+// ═══════════════════════════════════════════
+// 🏁 MULTI RESULT
+// ═══════════════════════════════════════════
+socket.on('gameOver', ({ players }) => {
+  stopBotSimulation();
+  showLiveBoard(false);
+  // เพิ่ม finishTime ลง players ถ้ายังไม่มี
+  showMultiResult(players);
+});
+
+function showMultiResult(players) {
+  stopAllBGM(); playBGM('menu');
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('mrRankList').innerHTML = players.map((p, i) => {
+    const cls = i<3?`rank${i+1}`:'';
+    const isMe = p.id === socket.id;
+    return `<div class="mr-player-card ${cls}">
+      <div class="mr-rank">${medals[i]||(i+1)}</div>
+      <div class="mr-info">
+        <div class="mr-name">${isMe?'👤 ':''}${p.name}</div>
+        <div class="mr-detail">❤️ ${p.heart||0}/3</div>
+      </div>
+      <div class="mr-score">${p.score} แต้ม</div>
+    </div>`;
+  }).join('');
+
+  const myAnswerSection = document.getElementById('mrMyAnswers');
+  if (myAnswerLog.length > 0) {
+    myAnswerSection.style.display = 'block';
+    document.getElementById('mrQList').innerHTML = myAnswerLog.map((a,i) =>
+      `<div class="mr-q-row">
+        <span class="mr-q-icon">${a.correct?'✅':'❌'}</span>
+        <span class="mr-q-text">ข้อ ${i+1}: ${a.q}</span>
+        <span class="mr-q-ans ${a.correct?'ok':'bad'}">${a.correct ? a.rightAns : a.myAns+' (เฉลย: '+a.rightAns+')'}</span>
+      </div>`).join('');
+  } else {
+    myAnswerSection.style.display = 'none';
+  }
+
+  const winner = players[0];
+  const isIWin = winner && winner.id === socket.id;
+  document.getElementById('mrTitle').textContent = isIWin ? '🏆 คุณชนะ!' : '🎮 ผลการแข่งขัน';
+  document.getElementById('mrSub').textContent = `ผู้ชนะ: ${winner?.name||'-'} (${winner?.score||0} แต้ม)`;
+  if (isIWin) confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
+  showScreen('multiResult');
+}
+
+function multiResultBackMenu() {
+  playSFX('click');
+  window.isMultiplayer = false;
+  window.currentRoomCode = null;
+  stopAllBGM(); playBGM('menu');
+  $('menuHighScore').textContent = highScore;
+  showScreen('menu');
+}
+
 function initMagneticButtons() {
   const btns = document.querySelectorAll('button.choice, button.primary');
   btns.forEach(btn => {
@@ -1109,6 +1619,7 @@ function initMagneticButtons() {
   });
 }
 window.refreshAccountBtn();
+
 </script>
 
 </body>
