@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Math Block">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="images/icon-512.png">
+<link class="apple-touch-icon" href="images/icon-512.png">
 <link rel="icon" type="image/png" href="images/icon-512.png">
 
 <style>
@@ -29,6 +29,9 @@ body{
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   opacity: 1; transition: opacity 0.6s ease-out, visibility 0.6s;
+}
+canvas {
+  pointer-events: none !important;
 }
 #intro-overlay p {
   font-size: 28px; font-weight: bold; color: #374151;
@@ -186,7 +189,134 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   background: #f3f4f6; color: #4b5563; padding: 12px; border-radius: 15px;
   font-size: 16px; font-weight: bold; width: 100%;
 }
+
+/* ACCOUNT BUTTON */
+.account-btn{position:absolute;top:16px;left:16px;z-index:50;display:flex;align-items:center;gap:8px;background:#f3f4f6;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;color:#4b5563;cursor:pointer;border:none;transition:background 0.2s;}
+.account-btn:active{background:#e5e7eb;}
+.account-avatar-sm{width:26px;height:26px;border-radius:50%;background:#9ca3af;color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.account-avatar-sm img{width:26px;height:26px;border-radius:50%;object-fit:cover;}
+.lb-top-btn{position:absolute;top:16px;right:16px;z-index:50;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform 0.2s;}
+.lb-top-btn img{width:40px;height:40px;display:block;margin-bottom:2px;}
+.lb-top-btn span{font-size:11px;font-weight:bold;color:#6b7280;}
+.lb-top-btn:active{transform:scale(0.9);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal-box{background:white;width:90%;max-width:400px;border-radius:28px;padding:24px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 10px 25px rgba(0,0,0,0.2);}
+.modal-title{text-align:center;font-size:22px;font-weight:900;margin-bottom:16px;}
+.modal-scroll{flex:1;overflow-y:auto;margin-bottom:12px;}
+.btn-close-modal{background:#f3f4f6;color:#4b5563;padding:12px;border-radius:14px;font-size:16px;font-weight:bold;width:100%;border:none;cursor:pointer;}
+.acct-info{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.acct-avatar{width:52px;height:52px;border-radius:50%;background:#2563eb;color:white;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.acct-avatar img{width:52px;height:52px;object-fit:cover;}
+.acct-name{font-size:18px;font-weight:700;color:#111827;}
+.acct-email{font-size:13px;color:#9ca3af;margin-top:2px;}
+.section-title{font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:8px;margin-top:4px;}
+.input-name{width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:14px;font-size:16px;font-family:inherit;outline:none;transition:border 0.2s;margin-bottom:10px;}
+.input-name:focus{border-color:#2563eb;}
+.btn-save{background:#2563eb;color:white;padding:11px;border-radius:14px;font-size:15px;font-weight:700;width:100%;border:none;cursor:pointer;margin-bottom:10px;}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:white;color:#374151;border:2px solid #e5e7eb;padding:12px;border-radius:14px;font-size:15px;font-weight:600;width:100%;cursor:pointer;margin-bottom:10px;}
+.btn-google img{width:22px;height:22px;}
+.btn-logout{background:#fee2e2;color:#ef4444;padding:11px;border-radius:14px;font-size:15px;font-weight:700;width:100%;border:none;cursor:pointer;}
+.guest-notice{background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:10px 14px;font-size:13px;color:#92400e;margin-bottom:12px;}
+.lb-item{display:flex;align-items:center;padding:12px 8px;border-bottom:1px solid #f3f4f6;}
+.lb-item.me{background:#eff6ff;border-radius:12px;margin:2px -4px;padding:12px;}
+.lb-rank{font-size:20px;width:32px;text-align:center;flex-shrink:0;}
+.lb-name{flex:1;font-weight:600;color:#374151;margin:0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;}
+.lb-score{font-weight:bold;color:#2563eb;font-size:15px;}
+.lb-empty{text-align:center;color:#9ca3af;padding:24px;font-size:15px;}
+.not-saved-msg{font-size:13px;color:#9ca3af;margin-top:6px;display:none;}
+
+/* ── SUMMARY SCREEN ── */
+#summary {
+  background: #f9fafb;
+  overflow-y: auto;
+  justify-content: flex-start;
+  align-items: center;
+}
+.summary-wrap {
+  width: 92%; max-width: 420px;
+  padding: 24px 0 40px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.summary-header {
+  text-align: center; padding: 28px 20px 22px;
+  border-radius: 22px; position: relative; overflow: hidden;
+}
+.summary-header.win  { background: linear-gradient(135deg,#22c55e,#16a34a); color: white; }
+.summary-header.lose { background: linear-gradient(135deg,#ef4444,#dc2626); color: white; }
+.summary-header.quit { background: linear-gradient(135deg,#6b7280,#4b5563); color: white; }
+.summary-header::before {
+  content:''; position:absolute; right:-30px; top:-30px;
+  width:120px; height:120px; background:rgba(255,255,255,0.08); border-radius:50%;
+}
+.summary-header::after {
+  content:''; position:absolute; left:-20px; bottom:-20px;
+  width:80px; height:80px; background:rgba(255,255,255,0.06); border-radius:50%;
+}
+.summary-emoji { font-size:52px; margin-bottom:6px; }
+.summary-title { font-size:26px; font-weight:900; margin-bottom:2px; }
+.summary-sub   { font-size:13px; opacity:0.85; font-weight:600; }
+
+.summary-score-box {
+  background:white; border-radius:18px; padding:20px; text-align:center;
+  box-shadow:0 3px 12px rgba(0,0,0,0.07); border:2px solid #f3f4f6;
+}
+.summary-score-num  { font-size:64px; font-weight:900; line-height:1; color:#111827; }
+.summary-score-label{ font-size:13px; color:#9ca3af; font-weight:700; margin-top:4px; letter-spacing:1px; text-transform:uppercase; }
+.summary-hs {
+  display:inline-flex; align-items:center; gap:6px;
+  background:#fef9c3; border:1px solid #fde68a;
+  padding:5px 14px; border-radius:20px;
+  font-size:13px; color:#92400e; font-weight:700; margin-top:10px;
+}
+.summary-new-record {
+  display:none; margin-top:8px;
+  font-size:14px; font-weight:900; color:#ea580c;
+  animation:summaryPulse 0.9s infinite;
+}
+@keyframes summaryPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+
+.summary-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.stat-card {
+  background:white; border-radius:16px; padding:16px 12px; text-align:center;
+  box-shadow:0 3px 10px rgba(0,0,0,0.06); border:2px solid #f3f4f6; transition:transform 0.15s;
+}
+.stat-icon { font-size:28px; margin-bottom:6px; }
+.stat-val  { font-size:24px; font-weight:900; color:#111827; line-height:1; }
+.stat-lbl  { font-size:11px; color:#9ca3af; font-weight:700; margin-top:4px; text-transform:uppercase; letter-spacing:0.5px; }
+.stat-card.green  { border-color:#bbf7d0; background:#f0fdf4; }
+.stat-card.green  .stat-val { color:#16a34a; }
+.stat-card.blue   { border-color:#bfdbfe; background:#eff6ff; }
+.stat-card.blue   .stat-val { color:#2563eb; }
+.stat-card.amber  { border-color:#fde68a; background:#fffbeb; }
+.stat-card.amber  .stat-val { color:#d97706; }
+.stat-card.red    { border-color:#fecaca; background:#fff1f2; }
+.stat-card.red    .stat-val { color:#ef4444; }
+.stat-card.purple { border-color:#ddd6fe; background:#f5f3ff; }
+.stat-card.purple .stat-val { color:#7c3aed; }
+.stat-card.pink   { border-color:#fbcfe8; background:#fdf2f8; }
+.stat-card.pink   .stat-val { color:#db2777; }
+
+.summary-btns { display:flex; flex-direction:column; gap:10px; }
+.btn-play-again {
+  background:#2563eb; color:white; font-size:17px; font-weight:800;
+  padding:15px; border-radius:16px; border:none; cursor:pointer;
+  box-shadow:0 4px 12px rgba(37,99,235,0.3); transition:transform 0.15s;
+  width:100%;
+}
+.btn-play-again:active { transform:scale(0.97); }
+.btn-back-menu {
+  background:#e5e7eb; color:#4b5563; font-size:15px; font-weight:800;
+  padding:13px; border-radius:16px; border:none; cursor:pointer; width:100%;
+  transition:transform 0.15s;
+}
+.btn-back-menu:active { transform:scale(0.97); }
+.summary-not-saved { font-size:12px; color:#9ca3af; text-align:center; display:none; margin-top:-4px; }
+
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 </head>
 <body>
 
@@ -195,9 +325,13 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 </div>
 
 <div id="menu" class="screen active menu-screen">
-  <div class="history-top-btn" onclick="openHistory()">
-    <img src="images/paper-icon.png" alt="History">
-    <span>ประวัติ</span>
+  <button class="account-btn" id="accountBtn" onclick="openAccountModal()">
+    <div class="account-avatar-sm" id="avatarSm"><span>?</span></div>
+    <span id="accountLabel">เข้าสู่ระบบ</span>
+  </button>
+  <div class="lb-top-btn" onclick="openLeaderboard()">
+    <img src="images/trophy.png" alt="อันดับ">
+    <span>อันดับ</span>
   </div>
 
   <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span><span>＋</span><span>×</span></div>
@@ -207,16 +341,23 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
     <div class="highscore-box">
         <img src="images/trophy.png" class="icon-sm" alt="Trophy"> สถิติสูงสุด: <span id="menuHighScore">0</span>
     </div><br>
-    <button class="primary" onclick="startGame()">เริ่มเกม</button>
+    <button class="primary" onclick="openLobby()">เริ่มเกม</button>
   </div>
 </div>
 
-<div id="history-modal" onclick="closeHistory(event)">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <h2 style="text-align:center; font-size:24px; font-weight:900;">ประวัติการเล่น</h2>
-    <div class="history-scroll" id="historyList"></div>
-    <button class="btn-clear" onclick="clearHistory()">🗑 ล้างประวัติและคะแนนสูงสุด</button>
-    <button class="btn-close" onclick="closeHistory()">ปิด</button>
+<div class="modal-overlay" id="accountModal" onclick="closeOutside(event,'accountModal')">
+  <div class="modal-box">
+    <div class="modal-title">👤 บัญชีของฉัน</div>
+    <div class="modal-scroll" id="accountContent"></div>
+    <button class="btn-close-modal" onclick="closeModal('accountModal')">ปิด</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="lbModal" onclick="closeOutside(event,'lbModal')">
+  <div class="modal-box">
+    <div class="modal-title">🏆 อันดับสูงสุด</div>
+    <div class="modal-scroll" id="lbList"><p class="lb-empty">กำลังโหลด...</p></div>
+    <button class="btn-close-modal" onclick="closeModal('lbModal')">ปิด</button>
   </div>
 </div>
 
@@ -232,11 +373,19 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
         <span style="margin: 0 5px; opacity: 0.3">|</span> 
         <img src="images/score.png" class="icon-sm" alt="Score"> <span id="score">0</span>
     </div>
-    <div class="hud-center">
-        <img src="images/clock.png" class="icon-sm" alt="Clock"> <span id="time">10</span>
+    <div class="hud-center" style="display: flex; flex-direction: column; align-items: center;">
+        <div style="font-size: 16px; font-weight: bold; color: #4b5563; margin-bottom: 5px;">ข้อที่ <span id="qCount">1</span>/<span id="qMax">10</span></div>
+        
+        <div><img src="images/clock.png" class="icon-sm" alt="Clock"> <span id="time">10</span></div>
+        <div id="comboDisplay" style="font-size: 14px; color: #f59e0b; display: none; margin-top: 5px; font-weight: bold; animation: pulseText 1s infinite;">
+            🔥 Combo x<span id="comboCount">0</span>
+        </div>
     </div>
-    <div class="hud-right"><button onclick="pauseGame()">หยุด</button></div>
+    <div class="hud-right">
+        <button onclick="pauseGame()">หยุด</button>
+    </div>
   </div>
+
   <div class="game" id="gameContainer">
     <div id="bonusLabel" class="bonus-label">✨ BONUS: รับหัวใจคืน! ✨</div>
     <div class="question" id="question"></div>
@@ -256,69 +405,254 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 </div>
 
 <div id="over" class="screen">
-  <div class="big">GAME OVER</div>
+  <div class="big" id="endGameTitle">GAME OVER</div>
   <div class="score-info">
     <p>คะแนนของคุณ: <span id="final" style="font-weight:bold; font-size:28px;">0</span></p>
     <p style="font-size:16px; color:#6b7280; margin-top:5px; display:flex; align-items:center; justify-content:center; gap:5px;">
         <img src="images/trophy.png" class="icon-sm" style="height:20px;" alt="Trophy"> สถิติสูงสุด: <span id="bestScore">0</span>
     </p>
     <p id="newRecordMsg" class="new-record">🎉 ยินดีด้วย! สถิติใหม่ 🎉</p>
+    <p id="notSavedMsg" class="not-saved-msg">⚠️ ไม่ได้บันทึกคะแนน — กรุณาเข้าสู่ระบบก่อนเล่น</p>
   </div>
   <button class="primary" onclick="startGame()">เล่นอีกครั้ง</button><br><br>
   <button onclick="backMenu()">กลับหน้าแรก</button>
 </div>
 
+<!-- ── SUMMARY SCREEN ── -->
+<div id="summary" class="screen">
+  <div class="summary-wrap">
+
+    <!-- Header (win / lose / quit) -->
+    <div class="summary-header" id="summaryHeader">
+      <div class="summary-emoji" id="summaryEmoji">🏆</div>
+      <div class="summary-title" id="summaryTitle">ชนะ!</div>
+      <div class="summary-sub"  id="summarySub">ทำได้ยอดเยี่ยมมาก!</div>
+    </div>
+
+    <!-- Score big -->
+    <div class="summary-score-box">
+      <div class="summary-score-num" id="summaryScore">0</div>
+      <div class="summary-score-label">คะแนนรวม</div>
+      <div class="summary-hs">
+        <img src="images/trophy.png" style="height:16px;" alt="">
+        สถิติสูงสุด: <b id="summaryBest">0</b>
+      </div>
+      <div class="summary-new-record" id="summaryNewRecord">🎉 สถิติใหม่! ยินดีด้วย 🎉</div>
+    </div>
+
+    <!-- Stats grid -->
+    <div class="summary-stats">
+      <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-val" id="statCorrect">0</div>
+        <div class="stat-lbl">ข้อที่ตอบถูก</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">❌</div>
+        <div class="stat-val" id="statWrong">0</div>
+        <div class="stat-lbl">ข้อที่ตอบผิด</div>
+      </div>
+      <div class="stat-card pink">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-val" id="statBonus">0</div>
+        <div class="stat-lbl">ข้อโบนัส</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-val" id="statCombo">0</div>
+        <div class="stat-lbl">Combo สูงสุด</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-icon">⏱</div>
+        <div class="stat-val" id="statTime">0s</div>
+        <div class="stat-lbl">เวลาที่ใช้</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon">❤️</div>
+        <div class="stat-val" id="statHearts">0</div>
+        <div class="stat-lbl">หัวใจที่เหลือ</div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="summary-btns">
+      <div class="summary-not-saved" id="summaryNotSaved">⚠️ ไม่ได้บันทึกคะแนน — กรุณาเข้าสู่ระบบก่อนเล่น</div>
+      <button class="btn-play-again" onclick="startGame()">🔄 เล่นอีกครั้ง</button>
+      <button class="btn-back-menu"  onclick="goBackMenuFromSummary()">🏠 กลับหน้าหลัก</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="lobby" class="screen">
+  <div class="math-bg"><span>＋</span><span>－</span><span>×</span><span>÷</span></div>
+  <h2 class="logo" style="font-size: 40px; color: #111827; margin-top: 20px;">ห้องเตรียมพร้อม</h2>
+  
+  <div style="display: flex; flex-direction: column; gap: 15px; width: 90%; max-width: 400px; z-index: 2;">
+    
+   <div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom: 12px; color: #374151; font-size: 18px;">🛠 สร้างห้องใหม่</h3>
+        
+        <select id="difficulty" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 16px; outline: none; font-family: inherit;">
+            <option value="easy">ระดับ: ง่าย </option>
+            <option value="normal">ระดับ: ปานกลาง </option>
+            <option value="hard">ระดับ: ยาก </option>
+        </select> <label style="color: #374151; font-size: 14px; margin-top: 5px; font-weight: bold; display: block;">🎯 จำนวนข้อต่อรอบ:</label>
+        <select id="qCountSetting" style="width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 5px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 16px; outline: none; font-family: inherit;" onchange="toggleCustomQInput()">
+            <option value="10">10 ข้อ</option>
+            <option value="20">20 ข้อ</option>
+            <option value="30">30 ข้อ</option>
+            <option value="custom">⚙️ กำหนดเอง...</option>
+            <option value="unlimited">♾️ ไม่จำกัดข้อ (เล่นจนหัวใจหมด)</option>
+        </select>
+        
+        <div id="customQDiv" style="display: none; margin-top: 5px; margin-bottom: 5px;">
+            <input type="number" id="customQInput" placeholder="ระบุจำนวนข้อ เช่น 15, 50" min="1" max="100" style="width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 16px; outline: none; text-align: center;">
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="primary" style="flex: 1; font-size: 16px; padding: 12px; border-radius: 14px;" onclick="alert('กำลังสร้างห้อง 1v1...')">ดวล 1v1</button>
+            <button class="primary" style="flex: 1; font-size: 16px; padding: 12px; background: #10b981; border-radius: 14px;" onclick="alert('กำลังสร้างห้องเล่นกลุ่ม...')">เล่นกลุ่ม</button>
+        </div>
+    </div>
+
+    <div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom: 12px; color: #374151; font-size: 18px;">🔑 เข้าห้องด้วยรหัส</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="roomCodeInput" placeholder="รหัส 4 หลัก" maxlength="4" style="flex: 1; padding: 12px; border-radius: 14px; border: 2px solid #e5e7eb; font-size: 20px; text-align: center; letter-spacing: 5px; font-weight: bold; outline: none;">
+            <button class="primary" style="background: #f59e0b; padding: 12px 20px; font-size: 16px; border-radius: 14px;" onclick="alert('กำลังค้นหาห้อง...')">เข้าห้อง</button>
+        </div>
+    </div>
+
+    <button class="primary" style="background: #8b5cf6; font-size: 18px; padding: 15px; border-radius: 16px; box-shadow: 0 4px 10px rgba(139,92,246,0.3);" onclick="startGame()">🤖 ซ้อมแข่งกับ Bot AI</button>
+    
+    <button onclick="backToMenuFromLobby()" style="background: #e5e7eb; color: #4b5563; padding: 14px; border-radius: 16px; font-weight: bold; font-size: 16px; margin-top: 5px;">กลับหน้าแรก</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyCwLz_vZALA2T6EGNCWsEmHnmlKylrq2no",authDomain:"math-block-choice.firebaseapp.com",projectId:"math-block-choice",storageBucket:"math-block-choice.firebasestorage.app",messagingSenderId:"1060980930155",appId:"1:1060980930155:web:984c5782bd01ba3b28e32e"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);const db=getFirestore(app);
+window._fb={auth,db,GoogleAuthProvider,signInWithPopup,signOut,doc,setDoc,getDoc,collection,query,orderBy,limit,getDocs};
+
+onAuthStateChanged(auth,async(user)=>{
+  window._user=user;
+  if(user){
+    try{const snap=await getDoc(doc(db,'users',user.uid));
+      if(snap.exists()){window._displayName=snap.data().displayName||snap.data().name||user.displayName||'ผู้เล่น';
+        const hs=snap.data().highScore||0;if(hs>window.highScore){window.highScore=hs;document.getElementById('menuHighScore').textContent=hs;localStorage.setItem('mathBlockHighScore',hs);}}
+      else{window._displayName=user.displayName||'ผู้เล่น';}
+    }catch(e){window._displayName=user.displayName||'ผู้เล่น';}
+  }else{window._user=null;window._displayName=null;}
+  if(window.refreshAccountBtn)window.refreshAccountBtn();
+});
+</script>
+
 <script>
-let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null;
+let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null, combo=0, currentQuestion=0, maxQuestions=10, isUnlimited=false;
+let statCorrectCount=0, statWrongCount=0, statBonusCount=0, statMaxCombo=0, gameStartTime=0, statTimeUsed=0;
 let isBonus=false, bonusCooldown=false, lastQuestionText="";
 let inputLocked = false;
 let isGameOver = false; 
 let highScore = parseInt(localStorage.getItem('mathBlockHighScore')) || 0;
 let audioInited = false;
 const $ = id => document.getElementById(id);
+
+window._user=null;window._displayName=null;
+
+window.refreshAccountBtn=function(){
+  const u=window._user;const name=window._displayName||(u?u.displayName:'');
+  const el=document.getElementById('accountLabel');if(el)el.textContent=u?(name||'บัญชี').split(' ')[0]:'เข้าสู่ระบบ';
+  const av=document.getElementById('avatarSm');if(!av)return;
+  if(u&&u.photoURL){av.innerHTML='<img src="'+u.photoURL+'" alt="">';}
+  else if(u&&name){av.style.background='#2563eb';av.innerHTML='<span style="color:white">'+name.charAt(0).toUpperCase()+'</span>';}
+  else{av.style.background='#9ca3af';av.innerHTML='<span style="color:white">?</span>';}
+};
+
+window.openAccountModal=function(){
+  playSFX('click');
+  const u=window._user;const name=window._displayName||(u?u.displayName||'ผู้เล่น':'');
+  let html='';
+  if(u){
+    const av=u.photoURL?'<img src="'+u.photoURL+'" alt="">':name.charAt(0).toUpperCase();
+    html='<div class="acct-info"><div class="acct-avatar">'+av+'</div><div><div class="acct-name">'+name+'</div><div class="acct-email">'+(u.email||'')+'</div></div></div>'
+    +'<div class="section-title">เปลี่ยนชื่อในเกม</div>'
+    +'<input class="input-name" id="nameInput" type="text" placeholder="ชื่อในเกม" value="'+name+'" maxlength="20">'
+    +'<button class="btn-save" onclick="saveName()">💾 บันทึกชื่อ</button>'
+    +'<button class="btn-logout" onclick="doLogout()">ออกจากระบบ</button>';
+  }else{
+    html='<div class="acct-info"><div class="acct-avatar" style="background:#9ca3af">?</div><div><div class="acct-name" style="color:#6b7280">ผู้เล่นทั่วไป</div><div class="acct-email">ยังไม่ได้เข้าสู่ระบบ</div></div></div>'
+    +'<div class="guest-notice">⚠️ คะแนนจะไม่ถูกบันทึกและไม่ขึ้น Leaderboard</div>'
+    +'<button class="btn-google" onclick="doLogin()"><img src="https://www.google.com/favicon.ico" alt="Google"> เข้าสู่ระบบด้วย Google</button>';
+  }
+  document.getElementById('accountContent').innerHTML=html;
+  document.getElementById('accountModal').classList.add('open');
+};
+
+window.saveName=async function(){
+  const n=document.getElementById('nameInput').value.trim();if(!n){alert('กรุณาใส่ชื่อ');return;}
+  const u=window._user;if(!u)return;
+  try{window._displayName=n;const fb=window._fb;
+    await fb.setDoc(fb.doc(fb.db,'users',u.uid),{displayName:n,name:n},{merge:true});
+    window.refreshAccountBtn();alert('✅ บันทึกชื่อแล้ว: '+n);
+  }catch(e){alert('บันทึกไม่สำเร็จ');}
+};
+
+window.doLogin = async function(){
+  try{
+    const fb = window._fb;
+    await signInWithRedirect(fb.auth, new fb.GoogleAuthProvider());
+  }catch(e){
+    alert('ล็อกอินไม่สำเร็จ');
+  }
+};
+
+window.doLogout=async function(){
+  if(confirm('ออกจากระบบ?')){await window._fb.signOut(window._fb.auth);window._displayName=null;window.refreshAccountBtn();closeModal('accountModal');}
+};
+
+window.closeModal=function(id){document.getElementById(id).classList.remove('open');};
+window.closeOutside=function(e,id){if(e.target===document.getElementById(id))closeModal(id);};
+
+window.openLeaderboard=async function(){
+  playSFX('click');document.getElementById('lbModal').classList.add('open');
+  document.getElementById('lbList').innerHTML='<p class="lb-empty">กำลังโหลด...</p>';
+  try{const fb=window._fb;
+    const q=fb.query(fb.collection(fb.db,'scores'),fb.orderBy('highScore','desc'),fb.limit(10));
+    const snap=await fb.getDocs(q);
+    if(snap.empty){document.getElementById('lbList').innerHTML='<p class="lb-empty">ยังไม่มีข้อมูล — เป็นคนแรก! 🎉</p>';return;}
+    const medals=['🥇','🥈','🥉'];let html='',rank=1;
+    snap.forEach(d=>{const data=d.data();const isMe=window._user&&d.id===window._user.uid;
+      const n=data.displayName||data.name||'ไม่ระบุชื่อ';
+      html+='<div class="lb-item '+(isMe?'me':'')+'"><span class="lb-rank">'+(medals[rank-1]||rank)+'</span><span class="lb-name">'+(isMe?'👤 ':'')+n+'</span><span class="lb-score">'+data.highScore+' แต้ม</span></div>';rank++;});
+    document.getElementById('lbList').innerHTML=html;
+  }catch(e){document.getElementById('lbList').innerHTML='<p class="lb-empty">โหลดไม่สำเร็จ</p>';}
+};
+
+async function saveScoreOnline(s){
+  const u=window._user;if(!u)return;
+  try{const fb=window._fb;const ref=fb.doc(fb.db,'users',u.uid);
+    const snap=await fb.getDoc(ref);const prev=snap.exists()?(snap.data().highScore||0):0;
+    const n=window._displayName||u.displayName||'ผู้เล่น';
+    if(s>prev)await fb.setDoc(ref,{
+  highScore: Math.max(s, prev || 0),
+  name:n,
+  displayName:n,
+  photo:u.photoURL||''
+},{merge:true});
+  }catch(e){}
+}
+
 $("menuHighScore").textContent = highScore;
 
 let audioCtx = null;
 let soundBuffers = {};
 let bgSources = { menu: null, game: null, bonus: null };
-
-function saveHistory(s) {
-    let h = JSON.parse(localStorage.getItem('mathBlockHistory')) || [];
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('th-TH', {day:'2-digit', month:'short'}) + " " + now.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
-    h.unshift({ score: s, date: dateStr });
-    localStorage.setItem('mathBlockHistory', JSON.stringify(h));
-}
-
-function openHistory() {
-    playSFX('click');
-    const h = JSON.parse(localStorage.getItem('mathBlockHistory')) || [];
-    let html = h.map(item => `
-        <div class="history-item">
-            <span style="color:#6b7280">${item.date}</span>
-            <span style="font-weight:bold; color:#2563eb">${item.score} แต้ม</span>
-        </div>
-    `).join('');
-    if(h.length === 0) html = '<p style="text-align:center; color:#9ca3af; padding:20px;">ยังไม่มีประวัติการเล่น</p>';
-    $("historyList").innerHTML = html;
-    $("history-modal").style.display = "flex";
-}
-
-function closeHistory(e) {
-    if (e && e.type === 'click' && e.target !== $("history-modal")) return;
-    $("history-modal").style.display = "none";
-}
-
-function clearHistory() {
-    if (confirm("คุณแน่ใจหรือไม่ที่จะล้างประวัติและคะแนนสูงสุดทั้งหมด?")) {
-        localStorage.removeItem('mathBlockHistory');
-        localStorage.removeItem('mathBlockHighScore');
-        highScore = 0;
-        $("menuHighScore").textContent = 0;
-        if($("bestScore")) $("bestScore").textContent = 0;
-        openHistory(); 
-    }
-}
 
 async function loadSound(name, url) {
   try {
@@ -424,14 +758,53 @@ function updateHighScore() {
   }
   return false;
 }
+function openLobby() {
+  playSFX('click');
+  showScreen('lobby');
+}
 
+function backToMenuFromLobby() {
+  playSFX('click');
+  showScreen('menu');
+}
+
+function toggleCustomQInput() {
+  const val = $("qCountSetting").value;
+  $("customQDiv").style.display = (val === "custom") ? "block" : "none";
+}
 function startGame(){
   playSFX('click');
   stopAllBGM();
   score=0; heart=3; isBonus=false; bonusCooldown=false;
-  isGameOver = false; 
+  isGameOver = false;
+  statCorrectCount=0; statWrongCount=0; statBonusCount=0; statMaxCombo=0;
+  gameStartTime = Date.now(); statTimeUsed=0;
   $("score").textContent=score; $("heart").textContent=heart;
   startCountdown();
+  combo = 0;
+ // --- ระบบตั้งค่าจำนวนข้อจากล็อบบี้ ---
+  const qSetting = $("qCountSetting").value;
+  
+  if (qSetting === "unlimited") {
+      isUnlimited = true;
+      maxQuestions = 999; 
+      $("qMax").textContent = "♾️";
+  } else if (qSetting === "custom") {
+      isUnlimited = false;
+      let customVal = parseInt($("customQInput").value);
+      if (isNaN(customVal) || customVal <= 0) {
+          customVal = 10; 
+      }
+      maxQuestions = customVal;
+      $("qMax").textContent = maxQuestions;
+  } else {
+      isUnlimited = false;
+      maxQuestions = parseInt(qSetting);
+      $("qMax").textContent = maxQuestions;
+  }
+  
+  currentQuestion = 1;
+  $("qCount").textContent = currentQuestion;
 }
 
 function startCountdown(){
@@ -460,20 +833,20 @@ function resumeGame(){
   playSFX('click'); paused=false; resumeBGM(); showScreen('game'); 
 }
 
-function backMenu(){ 
-  playSFX('click'); 
+function backMenu(){
+  playSFX('click');
   clearInterval(timer);
-  
-  if(score > 0 && !isGameOver) {
-      saveHistory(score);
-      updateHighScore();
-  }
+  stopAllBGM();
+  paused = false; inputLocked = false;
 
-  stopAllBGM(); 
-  playBGM('menu');
-  paused = false; 
-  $("menuHighScore").textContent = highScore;
-  showScreen('menu'); 
+  if (score > 0 && !isGameOver) {
+    // mid-game quit → show summary
+    showSummary('quit');
+  } else {
+    playBGM('menu');
+    $('menuHighScore').textContent = highScore;
+    showScreen('menu');
+  }
 }
 
 function calculate(a, op, b) {
@@ -484,7 +857,11 @@ function calculate(a, op, b) {
   return 0;
 }
 
-function nextQuestion(){
+function nextQuestion() {
+  if (!isUnlimited && currentQuestion > maxQuestions) {
+      gameOver();
+      return; 
+  }
   clearInterval(timer);
   inputLocked = false; 
   time=10; $("time").textContent=time;
@@ -508,8 +885,16 @@ function nextQuestion(){
 
   let expr = "", ans = 0;
   
+  const diffSetting = $("difficulty").value;
+  let selectedLevel = 2; 
+  if (diffSetting === "normal") {
+    selectedLevel = 3; 
+  } else if (diffSetting === "hard") {
+    selectedLevel = 4; 
+  }
+
   do {
-    let level = isBonus ? 4 : (score >= 300 ? 4 : (score >= 150 ? 3 : 2));
+    let level = isBonus ? 4 : selectedLevel;
     
     if (level === 2) {
       const ops=["+","-","×","÷"];
@@ -576,15 +961,46 @@ function choose(idx){
   if(paused || inputLocked || heart <= 0) return;
   clearInterval(timer);
   inputLocked = true;
-  if(idx===correctIndex){
+  
+  if(idx===correctIndex){ 
     playSFX('correct');
     $("btn"+idx).classList.add('success-pop');
     score+=10; $("score").textContent=score;
-    if(isBonus) { heart = Math.min(3, heart + 1); $("heart").textContent=heart; }
+    
+    combo++; statCorrectCount++;
+    if(combo > statMaxCombo) statMaxCombo = combo;
+    if(combo >= 2) {
+        $("comboDisplay").style.display = "block";
+        $("comboCount").textContent = combo;
+    }
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+    currentQuestion++;
+    if (isUnlimited) {
+        $("qCount").textContent = currentQuestion;
+        $("qMax").textContent = "♾️";
+    } else {
+        $("qCount").textContent = Math.min(currentQuestion, maxQuestions);
+    }
+
+    if(isBonus) { heart = Math.min(3, heart + 1); $("heart").textContent=heart; statBonusCount++; }
     setTimeout(nextQuestion, 400); 
-  } else {
+    
+  } else { 
     playSFX('wrong');
     $("btn"+idx).classList.add('error-shake');
+    
+    combo = 0; statWrongCount++;
+    $("comboDisplay").style.display = "none";
+
+    currentQuestion++;
+    if (isUnlimited) {
+        $("qCount").textContent = currentQuestion;
+        $("qMax").textContent = "♾️";
+    } else {
+        $("qCount").textContent = Math.min(currentQuestion, maxQuestions);
+    }
+
     fail(idx); 
   }
 }
@@ -601,20 +1017,73 @@ function fail(idx){
   }
 }
 
-function gameOver(){
-  clearInterval(timer); stopAllBGM(); playSFX('over');
-  $("final").textContent=score;
-  
-  saveHistory(score); 
-  const isNew = updateHighScore();
-  
-  $("bestScore").textContent = highScore;
-  $("newRecordMsg").style.display = isNew ? "block" : "none";
-  showScreen('over');
 
-  isGameOver = true; 
+function formatTime(ms) {
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return s + 'วิ';
+  return Math.floor(s/60) + 'น ' + (s%60) + 'วิ';
 }
 
+function showSummary(type) {
+  // type: 'win' | 'lose' | 'quit'
+  statTimeUsed = Date.now() - gameStartTime;
+
+  const cfg = {
+    win:  { cls:'win',  emoji:'🏆', title:'ชนะ!',        sub:'ทำได้ยอดเยี่ยมมาก!' },
+    lose: { cls:'lose', emoji:'💀', title:'Game Over',    sub:'สู้ต่อไปนะ ลองอีกครั้ง!' },
+    quit: { cls:'quit', emoji:'🚪', title:'ออกจากเกม',   sub:'คะแนนของคุณถึงตอนนี้' },
+  };
+  const c = cfg[type] || cfg.quit;
+
+  const header = $('summaryHeader');
+  header.className = 'summary-header ' + c.cls;
+  $('summaryEmoji').textContent  = c.emoji;
+  $('summaryTitle').textContent  = c.title;
+  $('summarySub').textContent    = c.sub;
+
+  $('summaryScore').textContent  = score;
+  const isNew = updateHighScore();
+  $('summaryBest').textContent   = highScore;
+  $('summaryNewRecord').style.display = isNew ? 'block' : 'none';
+
+  $('statCorrect').textContent   = statCorrectCount;
+  $('statWrong').textContent     = statWrongCount;
+  $('statBonus').textContent     = statBonusCount;
+  $('statCombo').textContent     = statMaxCombo + 'x';
+  $('statTime').textContent      = formatTime(statTimeUsed);
+  $('statHearts').textContent    = heart + ' / 3';
+
+  if (window._user) {
+    $('summaryNotSaved').style.display = 'none';
+    saveScoreOnline(score);
+  } else {
+    $('summaryNotSaved').style.display = 'block';
+  }
+
+  showScreen('summary');
+}
+
+function goBackMenuFromSummary() {
+  playSFX('click');
+  stopAllBGM(); playBGM('menu');
+  $('menuHighScore').textContent = highScore;
+  showScreen('menu');
+}
+
+function gameOver(){
+  clearInterval(timer); stopAllBGM();
+  isGameOver = true; inputLocked = false;
+
+  if (heart > 0) {
+    playSFX('correct');
+    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    setTimeout(() => confetti({ particleCount: 100, spread: 100, origin: { y: 0.5 } }), 300);
+    showSummary('win');
+  } else {
+    playSFX('over');
+    showSummary('lose');
+  }
+}
 function initMagneticButtons() {
   const btns = document.querySelectorAll('button.choice, button.primary');
   btns.forEach(btn => {
@@ -633,6 +1102,8 @@ function initMagneticButtons() {
     });
   });
 }
+window.refreshAccountBtn();
 </script>
+
 </body>
 </html>
