@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link class="apple-touch-icon" href="images/icon-512.png">
 <link rel="icon" type="image/png" href="images/icon-512.png">
+<script src="https://cdn.socket.io/4.7.0/socket.io.min.js"></script>
 
 <style>
 button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
@@ -554,6 +555,11 @@ onAuthStateChanged(auth,async(user)=>{
 </script>
 
 <script>
+  const SERVER_URL = 'http://localhost:3000'; // ชี้ไปที่ Server ในเครื่องเราก่อน
+const socket = io(SERVER_URL);
+
+socket.on('connect', () => console.log('เชื่อมต่อ server สำเร็จแล้ว!'));
+socket.on('error', (msg) => alert('❌ เกิดข้อผิดพลาด: ' + msg));
 let score=0, heart=3, time=10, timer=null, paused=false, correctIndex=0, countdownTimer=null, combo=0, currentQuestion=0, maxQuestions=10, isUnlimited=false;
 let statCorrectCount=0, statWrongCount=0, statBonusCount=0, statMaxCombo=0, gameStartTime=0, statTimeUsed=0;
 let isBonus=false, bonusCooldown=false, lastQuestionText="";
