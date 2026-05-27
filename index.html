@@ -316,22 +316,29 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
 
 /* ── LIVE SCOREBOARD (ระหว่างเล่น) ── */
 #liveBoard {
-  position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
-  background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
-  border-radius: 16px; padding: 8px 14px; z-index: 20;
-  min-width: 180px; max-width: 340px; width: 90%;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  display: none; flex-direction: column; gap: 4px;
+  width: 92%; max-width: 420px;
+  margin: 6px auto 0;
+  background: rgba(255,255,255,0.93);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 6px 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+  display: none;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 5;
 }
 .lb-live-item {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center;
   font-size: 13px; font-weight: 700; color: #374151;
   padding: 4px 6px; border-radius: 8px;
+  gap: 6px;
 }
 .lb-live-item.me { background: #eff6ff; color: #1d4ed8; }
+.lb-live-rank { font-size: 14px; width: 20px; text-align: center; flex-shrink:0; }
 .lb-live-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.lb-live-score { font-size:14px; font-weight:900; color:#2563eb; margin-left:8px; }
-.lb-live-heart { font-size:11px; color:#ef4444; margin-left:4px; }
+.lb-live-heart { font-size: 12px; color: #ef4444; font-weight: 800; flex-shrink:0; }
+.lb-live-score { font-size: 14px; font-weight: 900; color: #2563eb; min-width: 44px; text-align:right; flex-shrink:0; }
 
 /* ── SETTINGS MODAL ── */
 .settings-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid #f3f4f6; }
@@ -451,10 +458,17 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
       <div class="mr-sub" id="mrSub">ผลคะแนนทั้งหมด</div>
     </div>
     <div id="mrRankList"></div>
+
+    <!-- ปุ่ม toggle ดูรายละเอียดตัวเอง -->
+    <button id="mrToggleBtn" onclick="toggleMyAnswers()"
+      style="background:#eff6ff;color:#2563eb;border:2px solid #bfdbfe;font-size:14px;font-weight:700;padding:12px;border-radius:14px;width:100%;cursor:pointer;transition:.2s;display:none;">
+      📋 ดูผลคำตอบของฉัน ▼
+    </button>
     <div class="mr-my-answers" id="mrMyAnswers" style="display:none">
       <div class="mr-my-title">📋 ผลของคุณ (เห็นเฉพาะตัวเอง)</div>
       <div id="mrQList"></div>
     </div>
+
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
       <button class="btn-play-again" onclick="returnToWaitingRoom()">🔄 กลับห้องรอ</button>
       <button class="btn-back-menu" onclick="multiResultBackMenu()">🏠 กลับหน้าหลัก</button>
@@ -462,9 +476,19 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
   </div>
 </div>
 
+<!-- WAIT RESULT SCREEN -->
+<div id="waitResult" class="screen">
+  <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:20px;padding:40px 20px;">
+    <div style="font-size:60px;animation:pulseText 1.2s infinite;">⏳</div>
+    <h2 style="font-size:22px;font-weight:900;color:#111827;">รอผลรวมจากทุกคน...</h2>
+    <p style="color:#6b7280;font-size:15px;">คะแนนของคุณ: <strong id="waitMyScore" style="color:#2563eb;font-size:22px;">0</strong></p>
+    <p style="color:#9ca3af;font-size:13px;">รอให้ผู้เล่นคนอื่นเล่นจบ</p>
+  </div>
+</div>
+
 <div id="countdown" class="screen">
-  <div class="big" id="countNum">3</div><p>เตรียมพร้อม</p><br>
-  <button class="primary" onclick="skipCountdown()">ข้าม</button>
+  <div class="big" id="countNum">3</div>
+  <p id="countLabel">เตรียมพร้อม</p>
 </div>
 
 <div id="game" class="screen">
@@ -476,7 +500,6 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
     </div>
     <div class="hud-center" style="display: flex; flex-direction: column; align-items: center;">
         <div style="font-size: 16px; font-weight: bold; color: #4b5563; margin-bottom: 5px;">ข้อที่ <span id="qCount">1</span>/<span id="qMax">10</span></div>
-        
         <div><img src="images/clock.png" class="icon-sm" alt="Clock"> <span id="time">10</span></div>
         <div id="comboDisplay" style="font-size: 14px; color: #f59e0b; display: none; margin-top: 5px; font-weight: bold; animation: pulseText 1s infinite;">
             🔥 Combo x<span id="comboCount">0</span>
@@ -487,7 +510,7 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
     </div>
   </div>
 
-  <!-- Live Scoreboard -->
+  <!-- Live Scoreboard อยู่เหนือโจทย์ -->
   <div id="liveBoard"></div>
 
   <div class="game" id="gameContainer">
@@ -581,6 +604,15 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
     <!-- Buttons -->
     <div class="summary-btns">
       <div class="summary-not-saved" id="summaryNotSaved">⚠️ ไม่ได้บันทึกคะแนน — กรุณาเข้าสู่ระบบก่อนเล่น</div>
+      <!-- ปุ่มดูรายละเอียดคำตอบ (solo) -->
+      <button id="summaryDetailBtn" onclick="toggleSummaryDetail()"
+        style="background:#f0fdf4;color:#16a34a;border:2px solid #bbf7d0;font-size:14px;font-weight:700;padding:11px;border-radius:14px;width:100%;cursor:pointer;display:none;">
+        📋 ดูรายละเอียดคำตอบ ▼
+      </button>
+      <div id="summaryAnswerLog" style="display:none;text-align:left;background:#f9fafb;border-radius:14px;padding:12px;max-height:200px;overflow-y:auto;">
+        <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:8px;">📋 ผลรายข้อของคุณ</div>
+        <div id="summaryQList"></div>
+      </div>
       <button class="btn-play-again" onclick="startGame()">🔄 เล่นอีกครั้ง</button>
       <button class="btn-back-menu"  onclick="goBackMenuFromSummary()">🏠 กลับหน้าหลัก</button>
     </div>
@@ -628,7 +660,7 @@ button.primary:active { transform: scale(0.95) !important; background: #1d4ed8; 
         </div>
     </div>
 
-    <button class="primary" style="background: #8b5cf6; font-size: 18px; padding: 15px; border-radius: 16px; box-shadow: 0 4px 10px rgba(139,92,246,0.3);" onclick="startGame()">🤖 ซ้อมแข่งกับ Bot AI</button>
+    <button class="primary" style="background: #8b5cf6; font-size: 18px; padding: 15px; border-radius: 16px; box-shadow: 0 4px 10px rgba(139,92,246,0.3);" onclick="startGame()">🎮 เล่นคนเดียว</button>
     
     <button onclick="backToMenuFromLobby()" style="background: #e5e7eb; color: #4b5563; padding: 14px; border-radius: 16px; font-weight: bold; font-size: 16px; margin-top: 5px;">กลับหน้าแรก</button>
   </div>
@@ -1058,7 +1090,8 @@ function startGame(){
   stopAllBGM();
   score=0; heart=3; isBonus=false; bonusCooldown=false;
   isGameOver = false;
-  window.isMultiplayer = false;  // reset ให้เป็นโหมดเดี่ยวเสมอ
+  window.isMultiplayer = false;
+  myAnswerLog = [];  // reset log คำตอบ
   statCorrectCount=0; statWrongCount=0; statBonusCount=0; statMaxCombo=0;
   gameStartTime = Date.now(); statTimeUsed=0;
   $("score").textContent=score; $("heart").textContent=heart;
@@ -1089,16 +1122,26 @@ function startGame(){
 
 function startCountdown(){
   showScreen('countdown');
-  let c=3; $("countNum").textContent=c; playSFX('click');
+  let c = 3;
+  $("countNum").textContent = c;
+  playSFX('click');
+  // solo mode: แสดงปุ่มข้าม, multi mode: ไม่แสดง
+  $("countLabel").textContent = window.isMultiplayer ? 'เตรียมพร้อม — รอพร้อมกัน!' : 'เตรียมพร้อม';
   clearInterval(countdownTimer);
-  countdownTimer=setInterval(()=>{
+  countdownTimer = setInterval(() => {
     c--;
-    if(c>0) { $("countNum").textContent=c; playSFX('click'); }
+    if (c > 0) { $("countNum").textContent = c; playSFX('click'); }
     else { clearInterval(countdownTimer); showGame(); }
-  },1000);
+  }, 1000);
 }
 
-function skipCountdown(){ playSFX('click'); clearInterval(countdownTimer); showGame(); }
+function skipCountdown(){
+  // เฉพาะโหมดเดี่ยวเท่านั้น
+  if (window.isMultiplayer) return;
+  playSFX('click');
+  clearInterval(countdownTimer);
+  showGame();
+}
 
 function showGame(){
   paused=false;
@@ -1119,8 +1162,25 @@ function backMenu(){
   stopAllBGM();
   paused = false; inputLocked = false;
 
+  if (window.isMultiplayer && window.currentRoomCode && !isGameOver) {
+    // ออกกลางเกม multi → ส่งผลไป server แล้วรอหน้า waitResult
+    isGameOver = true;
+    statTimeUsed = Date.now() - gameStartTime;
+    socket.emit('playerFinished', {
+      code: window.currentRoomCode,
+      finalScore: score,
+      heartsLeft: heart,
+      timeMs: statTimeUsed,
+      reason: 'quit'
+    });
+    const waitEl = document.getElementById('waitMyScore');
+    if (waitEl) waitEl.textContent = score;
+    showScreen('waitResult');
+    return;
+  }
+
   if (score > 0 && !isGameOver) {
-    // mid-game quit → show summary
+    // mid-game quit solo → show summary
     showSummary('quit');
   } else {
     playBGM('menu');
@@ -1261,14 +1321,19 @@ function choose(idx){
   clearInterval(timer);
   inputLocked = true;
   
-  // track คำตอบ (ออนไลน์)
+  // track คำตอบ (ทั้ง solo และ online)
   if (window.isMultiplayer && window.multiQuestions) {
     const qIdx = currentQuestion - 1;
     const mq = window.multiQuestions[qIdx];
     if (mq) {
       const chosenVal = parseInt($("btn"+idx).textContent);
-      myAnswerLog.push({ q: mq.text, correct: idx===correctIndex, myAns: chosenVal, rightAns: mq.answer });
+      myAnswerLog.push({ q: mq.text + ' = ?', correct: idx===correctIndex, myAns: chosenVal, rightAns: mq.answer });
     }
+  } else if (!window.isMultiplayer) {
+    const qText = $("question").textContent;
+    const chosenVal = $("btn"+idx).textContent;
+    const correctVal = $("btn"+correctIndex).textContent;
+    myAnswerLog.push({ q: qText, correct: idx===correctIndex, myAns: chosenVal, rightAns: correctVal });
   }
 
   if(idx===correctIndex){ 
@@ -1340,13 +1405,11 @@ function formatTime(ms) {
 }
 
 function showSummary(type) {
-  // type: 'win' | 'lose' | 'quit'
   statTimeUsed = Date.now() - gameStartTime;
 
-  // ✅ กำหนด title/sub แยกตามว่าออนไลน์หรือเดี่ยว
   const isMP = !!window.isMultiplayer;
   const cfg = {
-    win:  { cls:'win',  emoji:'🏆', title: isMP ? 'จบแล้ว!' : 'ชนะ!',       sub: isMP ? 'รอดูผลรวมของทุกคน!' : 'ทำได้ยอดเยี่ยมมาก!' },
+    win:  { cls:'win',  emoji:'🏆', title:'ชนะ!',       sub:'ทำได้ยอดเยี่ยมมาก!' },
     lose: { cls:'lose', emoji:'💀', title:'Game Over',    sub:'สู้ต่อไปนะ ลองอีกครั้ง!' },
     quit: { cls:'quit', emoji:'🚪', title:'ออกจากเกม',   sub:'คะแนนของคุณถึงตอนนี้' },
   };
@@ -1359,37 +1422,64 @@ function showSummary(type) {
   $('summarySub').textContent    = c.sub;
 
   $('summaryScore').textContent  = score;
-  const isNew = !isMP && updateHighScore();
-  $('summaryBest').textContent   = isMP ? '-' : highScore;
+  const isNew = updateHighScore();
+  $('summaryBest').textContent   = highScore;
   $('summaryNewRecord').style.display = isNew ? 'block' : 'none';
 
   $('statCorrect').textContent   = statCorrectCount;
   $('statWrong').textContent     = statWrongCount;
-  $('statBonus').textContent     = isMP ? '-' : statBonusCount;
+  $('statBonus').textContent     = statBonusCount;
   $('statCombo').textContent     = statMaxCombo + 'x';
   $('statTime').textContent      = formatTime(statTimeUsed);
   $('statHearts').textContent    = heart + ' / 3';
 
-  // ✅ เปลี่ยนปุ่ม "เล่นอีกครั้ง" ตามโหมด
+  // ปุ่มเล่นอีกครั้ง (solo เท่านั้น)
   const btnPlayAgain = document.querySelector('.btn-play-again');
-  if (isMP) {
-    btnPlayAgain.textContent = '🔄 กลับห้องรอ';
-    btnPlayAgain.onclick = returnToWaitingRoom;
-  } else {
-    btnPlayAgain.textContent = '🔄 เล่นอีกครั้ง';
-    btnPlayAgain.onclick = startGame;
-  }
+  btnPlayAgain.textContent = '🔄 เล่นอีกครั้ง';
+  btnPlayAgain.onclick = startGame;
 
-  if (!isMP && window._user) {
+  // ปุ่มดูรายละเอียดคำตอบ
+  const detailBtn = $('summaryDetailBtn');
+  const qList = $('summaryQList');
+  if (myAnswerLog.length > 0) {
+    detailBtn.style.display = 'block';
+    qList.innerHTML = myAnswerLog.map((a, i) =>
+      `<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:13px;">
+        <span>${a.correct?'✅':'❌'}</span>
+        <span style="flex:1;color:#374151;">ข้อ ${i+1}: ${a.q}</span>
+        <span style="font-weight:700;color:${a.correct?'#16a34a':'#ef4444'};">${a.correct ? a.rightAns : a.myAns+' (เฉลย:'+a.rightAns+')'}</span>
+      </div>`).join('');
+  } else {
+    detailBtn.style.display = 'none';
+  }
+  $('summaryAnswerLog').style.display = 'none';
+  if (detailBtn) detailBtn.textContent = '📋 ดูรายละเอียดคำตอบ ▼';
+
+  if (window._user) {
     $('summaryNotSaved').style.display = 'none';
     saveScoreOnline(score);
-  } else if (!isMP) {
-    $('summaryNotSaved').style.display = 'block';
   } else {
-    $('summaryNotSaved').style.display = 'none';
+    $('summaryNotSaved').style.display = 'block';
   }
 
   showScreen('summary');
+}
+
+function toggleSummaryDetail() {
+  const log = $('summaryAnswerLog');
+  const btn = $('summaryDetailBtn');
+  const open = log.style.display !== 'none';
+  log.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '📋 ดูรายละเอียดคำตอบ ▼' : '📋 ซ่อนรายละเอียด ▲';
+}
+
+function toggleMyAnswers() {
+  const section = document.getElementById('mrMyAnswers');
+  const btn = document.getElementById('mrToggleBtn');
+  if (!section || !btn) return;
+  const isOpen = section.style.display !== 'none';
+  section.style.display = isOpen ? 'none' : 'block';
+  btn.textContent = isOpen ? '📋 ดูผลคำตอบของฉัน ▼' : '📋 ซ่อนผลคำตอบ ▲';
 }
 
 // ✅ กลับห้องรอหลังเล่นออนไลน์จบ
@@ -1398,14 +1488,26 @@ function returnToWaitingRoom() {
   stopAllBGM();
   playBGM('menu');
   window.isMultiplayer = false;
+  myAnswerLog = [];
   if (window.currentRoomCode) {
+    const hostBtn = document.getElementById('hostStartBtn');
+    const waitMsg = document.getElementById('clientWaitMsg');
+    if (hostBtn) hostBtn.style.display = 'none';
+    if (waitMsg) waitMsg.style.display = 'none';
+    document.getElementById('waitingPlayerList').innerHTML =
+      '<p style="color:#9ca3af;text-align:center;padding:10px;">⏳ กำลังโหลด...</p>';
     showScreen('waitingRoom');
-    // ขอสถานะห้องใหม่จาก server
     socket.emit('rejoinRoom', { code: window.currentRoomCode });
   } else {
     showScreen('lobby');
   }
 }
+
+// รับสถานะห้องหลัง rejoin → server ส่ง roomRejoined กลับ
+socket.on('roomRejoined', ({ room, isHost }) => {
+  window.isRoomHost = isHost;
+  if (room && room.players) renderWaitingPlayers(room.players);
+});
 
 function goBackMenuFromSummary() {
   playSFX('click');
@@ -1418,14 +1520,21 @@ function goBackMenuFromSummary() {
 function gameOver(){
   clearInterval(timer); stopAllBGM();
   isGameOver = true; inputLocked = false;
+  statTimeUsed = Date.now() - gameStartTime;
 
   if (window.isMultiplayer && window.currentRoomCode) {
     const reason = heart > 0 ? 'finished' : 'dead';
     socket.emit('playerFinished', {
       code: window.currentRoomCode,
       finalScore: score,
+      heartsLeft: heart,
+      timeMs: statTimeUsed,
       reason
     });
+    const waitEl = document.getElementById('waitMyScore');
+    if (waitEl) waitEl.textContent = score;
+    showScreen('waitResult');
+    return;
   }
 
   // unlimited = จบเกมได้แค่ตอนหัวใจหมดเสมอ → lose
@@ -1490,14 +1599,15 @@ function renderLiveScoreboard(players) {
   const lb = document.getElementById('liveBoard');
   if (!lb) return;
   lb.style.display = 'flex';
+  const rankEmoji = ['🥇','🥈','🥉'];
   const sorted = Object.entries(players).sort((a,b) => b[1].score - a[1].score);
-  lb.innerHTML = sorted.map(([id, p]) => {
+  lb.innerHTML = sorted.map(([id, p], i) => {
     const isMe = id === socket.id || id === 'you';
-    const hearts = '❤️'.repeat(Math.max(0, p.heart||0));
     return `<div class="lb-live-item${isMe?' me':''}">
-      <span class="lb-live-name">${isMe?'👤 ':''} ${p.name}</span>
-      <span class="lb-live-heart">${hearts}</span>
-      <span class="lb-live-score">${p.score}</span>
+      <span class="lb-live-rank">${rankEmoji[i] || (i+1)}</span>
+      <span class="lb-live-name">${isMe?'👤 ':''}${p.name}</span>
+      <span class="lb-live-heart">❤️${p.heart??3}</span>
+      <span class="lb-live-score">${p.score} แต้ม</span>
     </div>`;
   }).join('');
 }
@@ -1564,23 +1674,26 @@ function showMultiResult(players) {
       <div class="mr-rank">${medals[i]||(i+1)}</div>
       <div class="mr-info">
         <div class="mr-name">${isMe?'👤 ':''}${p.name}</div>
-        <div class="mr-detail">❤️ ${p.heart||0}/3</div>
+        <div class="mr-detail">❤️ ${p.heart??0}/3 &nbsp;·&nbsp; ⏱ ${p.timeMs ? (p.timeMs/1000).toFixed(2)+' วิ' : '-'}</div>
       </div>
       <div class="mr-score">${p.score} แต้ม</div>
     </div>`;
   }).join('');
 
+  const toggleBtn = document.getElementById('mrToggleBtn');
   const myAnswerSection = document.getElementById('mrMyAnswers');
-  if (myAnswerLog.length > 0) {
-    myAnswerSection.style.display = 'block';
+  myAnswerSection.style.display = 'none'; // ซ่อนไว้ก่อนเสมอ
+  if (myAnswerLog.length > 0 && toggleBtn) {
+    toggleBtn.style.display = 'block';
+    toggleBtn.textContent = '📋 ดูผลคำตอบของฉัน ▼';
     document.getElementById('mrQList').innerHTML = myAnswerLog.map((a,i) =>
       `<div class="mr-q-row">
         <span class="mr-q-icon">${a.correct?'✅':'❌'}</span>
         <span class="mr-q-text">ข้อ ${i+1}: ${a.q}</span>
         <span class="mr-q-ans ${a.correct?'ok':'bad'}">${a.correct ? a.rightAns : a.myAns+' (เฉลย: '+a.rightAns+')'}</span>
       </div>`).join('');
-  } else {
-    myAnswerSection.style.display = 'none';
+  } else if (toggleBtn) {
+    toggleBtn.style.display = 'none';
   }
 
   const winner = players[0];

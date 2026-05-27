@@ -158,11 +158,16 @@ io.on('connection', (socket) => {
   });
 
   // ── ผู้เล่นจบเกม ────────────────────────────────
-  socket.on('playerFinished', ({ code, finalScore, reason }) => {
+  socket.on('playerFinished', ({ code, finalScore, heartsLeft, timeMs, reason }) => {
     const room = rooms[code];
     if (!room) return;
     const player = room.players[socket.id];
-    if (player) { player.score = finalScore; player.finished = true; }
+    if (player) {
+      player.score = finalScore;
+      player.heart = heartsLeft ?? player.heart;
+      player.timeMs = timeMs || 0;
+      player.finished = true;
+    }
 
     room.finishedPlayers++;
     log(`${player?.name} จบเกมในห้อง ${code} — ${finalScore} คะแนน (${reason})`);
@@ -205,8 +210,12 @@ io.on('connection', (socket) => {
   socket.on('rejoinRoom', ({ code }) => {
     const room = rooms[code];
     if (!room) return socket.emit('roomError', 'ห้องนี้ถูกปิดไปแล้ว');
-    socket.emit('playersUpdated', { players: room.players, newHost: room.host });
-    log(`${room.players[socket.id]?.name || '?'} กลับห้อง ${code}`);
+    const isHost = room.host === socket.id;
+    // ส่ง roomRejoined กลับเฉพาะคนนี้
+    socket.emit('roomRejoined', { room: safeRoom(room), isHost });
+    // แจ้งทุกคนในห้องด้วย
+    io.to(code).emit('playersUpdated', { players: room.players, newHost: room.host });
+    log(`${room.players[socket.id]?.name || '?'} กลับห้อง ${code} (host: ${isHost})`);
   });
 
   socket.on('disconnect', () => {
